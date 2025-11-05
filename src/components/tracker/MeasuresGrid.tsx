@@ -176,7 +176,12 @@ export function MeasuresGrid({
                   <td className="sticky left-0 z-10 bg-slate-900/95 border-r border-slate-800/50 px-4 py-3 backdrop-blur-sm">
                     <div className="flex flex-col gap-1.5">
                       <div className="flex items-center gap-2">
-                        <span className="font-medium text-white">{measure.name}</span>
+                        <Link 
+                          href={`/tracker/${measure.id}`}
+                          className="font-medium text-white hover:text-blue-400 transition-colors cursor-pointer"
+                        >
+                          {measure.name}
+                        </Link>
                         <Link href={`/tracker/${measure.id}`}>
                           <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-slate-800">
                             <ChartLine className="h-3.5 w-3.5" />

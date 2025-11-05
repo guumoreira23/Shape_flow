@@ -100,7 +100,14 @@ export function MeasureChartClient({
               Voltar
             </Button>
             <div>
-              <h1 className="text-3xl font-semibold text-white mb-1">{measure.name}</h1>
+              <h1 className="text-3xl font-semibold text-white mb-1">
+                {measure.name}
+                {goal && (
+                  <span className="ml-3 text-lg font-normal text-blue-400">
+                    – meta {goal.targetValue} {measure.unit}
+                  </span>
+                )}
+              </h1>
               <p className="text-minimal-muted">{measure.unit}</p>
             </div>
           </div>

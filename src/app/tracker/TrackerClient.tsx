@@ -17,7 +17,9 @@ import {
 import { Plus } from "lucide-react"
 import { MainLayout } from "@/components/layout/MainLayout"
 import { useToast } from "@/components/ui/use-toast"
-import { getTodayDate, formatDate } from "@/lib/utils/date"
+import { getTodayDate, formatDate, parseDate } from "@/lib/utils/date"
+import { Calendar } from "@/components/ui/calendar"
+import { format } from "date-fns"
 
 interface Measure {
   id: number
@@ -52,6 +54,8 @@ export function TrackerClient() {
   const [goals, setGoals] = useState<Goal[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [isDateDialogOpen, setIsDateDialogOpen] = useState(false)
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date())
   const [newMeasureName, setNewMeasureName] = useState("")
   const [newMeasureUnit, setNewMeasureUnit] = useState("")
 
@@ -138,22 +142,44 @@ export function TrackerClient() {
 
   const handleAddDate = async () => {
     try {
+      const dateString = formatDate(selectedDate)
       const response = await fetch("/api/date", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ date: formatDate(getTodayDate()) }),
+        body: JSON.stringify({ date: dateString }),
       })
 
-      if (response.ok) {
-        const newEntry = await response.json()
-        setEntries((prev) => [newEntry, ...prev])
-        toast({
-          title: "Data adicionada!",
-        })
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || "Erro ao adicionar data")
       }
-    } catch (error) {
+
+      const newEntry = await response.json()
+      
+      // Verificar se a entrada já existe na lista
+      const existingIndex = entries.findIndex(
+        (e) => e.id === newEntry.id || formatDate(parseDate(e.date)) === dateString
+      )
+      
+      if (existingIndex === -1) {
+        setEntries((prev) => [newEntry, ...prev].sort((a, b) => {
+          const dateA = parseDate(a.date)
+          const dateB = parseDate(b.date)
+          return dateB.getTime() - dateA.getTime()
+        }))
+      } else {
+        // Se já existe, apenas recarregar os dados
+        loadData()
+      }
+      
+      setIsDateDialogOpen(false)
+      toast({
+        title: "Data adicionada com sucesso!",
+      })
+    } catch (error: any) {
       toast({
         title: "Erro ao adicionar data",
+        description: error.message || "Verifique se a data não já existe",
         variant: "destructive",
       })
     }
@@ -177,10 +203,39 @@ export function TrackerClient() {
             <h1 className="text-3xl font-semibold text-white mb-2">Tracker de Medidas</h1>
             <p className="text-minimal-muted">Gerencie suas medidas corporais</p>
           </div>
-          <Button onClick={handleAddDate} variant="outline" className="gap-2">
-            <Plus className="h-4 w-4" />
-            Adicionar Data
-          </Button>
+          <Dialog open={isDateDialogOpen} onOpenChange={setIsDateDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" className="gap-2">
+                <Plus className="h-4 w-4" />
+                Adicionar Data
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Selecionar Data</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <Calendar
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={(date) => {
+                    if (date) setSelectedDate(date)
+                  }}
+                  locale={ptBR}
+                  className="rounded-md border"
+                />
+                <div className="text-sm text-minimal-muted">
+                  Data selecionada: {format(selectedDate, "dd/MM/yyyy")}
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setIsDateDialogOpen(false)}>
+                  Cancelar
+                </Button>
+                <Button onClick={handleAddDate}>Confirmar</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
 
         <div className="card-minimal p-6">
