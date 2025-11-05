@@ -24,12 +24,19 @@ export async function POST(request: NextRequest) {
     // Primeiro, adicionar coluna role se não existir
     try {
       await db.execute(sql`
-        ALTER TABLE users 
-        ADD COLUMN IF NOT EXISTS role TEXT NOT NULL DEFAULT 'user'
+        DO $$ 
+        BEGIN
+          IF NOT EXISTS (
+            SELECT 1 FROM information_schema.columns 
+            WHERE table_name = 'users' AND column_name = 'role'
+          ) THEN
+            ALTER TABLE users ADD COLUMN role TEXT NOT NULL DEFAULT 'user';
+          END IF;
+        END $$;
       `)
-    } catch (error) {
+    } catch (error: any) {
       // Coluna pode já existir, ignorar
-      console.log("Column role may already exist")
+      console.log("Column role setup:", error.message)
     }
 
     // Criar admin
