@@ -1,20 +1,36 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Checkbox } from "@/components/ui/checkbox"
 import { loginSchema } from "@/lib/utils/zod"
 import { useToast } from "@/components/ui/use-toast"
+
+const REMEMBER_ME_KEY = "shapeflow_remember_me"
+const REMEMBERED_EMAIL_KEY = "shapeflow_remembered_email"
 
 export default function LoginPage() {
   const router = useRouter()
   const { toast } = useToast()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [rememberMe, setRememberMe] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+
+  // Carregar email salvo ao montar o componente
+  useEffect(() => {
+    const rememberedEmail = localStorage.getItem(REMEMBERED_EMAIL_KEY)
+    const shouldRemember = localStorage.getItem(REMEMBER_ME_KEY) === "true"
+    
+    if (shouldRemember && rememberedEmail) {
+      setEmail(rememberedEmail)
+      setRememberMe(true)
+    }
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -33,6 +49,15 @@ export default function LoginPage() {
 
       if (!response.ok) {
         throw new Error(data.error || "Erro ao fazer login")
+      }
+
+      // Salvar email se "Lembrar-me" estiver marcado
+      if (rememberMe) {
+        localStorage.setItem(REMEMBER_ME_KEY, "true")
+        localStorage.setItem(REMEMBERED_EMAIL_KEY, validatedData.email)
+      } else {
+        localStorage.removeItem(REMEMBER_ME_KEY)
+        localStorage.removeItem(REMEMBERED_EMAIL_KEY)
       }
 
       toast({
@@ -85,6 +110,19 @@ export default function LoginPage() {
               required
               className="mt-1"
             />
+          </div>
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="remember"
+              checked={rememberMe}
+              onCheckedChange={(checked) => setRememberMe(checked === true)}
+            />
+            <Label
+              htmlFor="remember"
+              className="text-sm font-normal cursor-pointer text-slate-400 hover:text-slate-200"
+            >
+              Lembrar usuário e senha
+            </Label>
           </div>
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? "Entrando..." : "Entrar"}
