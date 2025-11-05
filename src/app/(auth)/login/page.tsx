@@ -61,14 +61,14 @@ export default function LoginPage() {
         localStorage.removeItem(REMEMBERED_EMAIL_KEY)
       }
 
-      // Verificar se o cookie foi definido antes de redirecionar
       // Aguardar um pouco para garantir que o cookie seja processado pelo navegador
-      await new Promise((resolve) => setTimeout(resolve, 300))
+      await new Promise((resolve) => setTimeout(resolve, 500))
       
       // Verificar autenticação antes de redirecionar
       try {
         const checkResponse = await fetch("/api/auth/check", {
           credentials: "include",
+          cache: "no-store",
         })
         const checkData = await checkResponse.json()
         
@@ -76,8 +76,14 @@ export default function LoginPage() {
           toast({
             title: "Login realizado com sucesso!",
           })
-          // Usar window.location para garantir que a navegação aconteça com os cookies
-          window.location.href = "/dashboard"
+          // Usar router.push seguido de window.location para garantir que funcione
+          router.push("/dashboard")
+          // Fallback: se o router não funcionar, usar window.location após um delay
+          setTimeout(() => {
+            if (window.location.pathname === "/login") {
+              window.location.href = "/dashboard"
+            }
+          }, 1000)
         } else {
           throw new Error("Falha na autenticação. Tente novamente.")
         }
