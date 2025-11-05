@@ -221,6 +221,34 @@ export function MeasuresGrid({
     setIsDeleteAlertOpen(true)
   }
 
+  const confirmDelete = async () => {
+    if (!measureToDelete) return
+
+    try {
+      const response = await fetch(`/api/measure-types/${measureToDelete.id}`, {
+        method: "DELETE",
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || "Erro ao deletar medida")
+      }
+
+      toast({
+        title: "Medida deletada com sucesso!",
+      })
+      setIsDeleteAlertOpen(false)
+      setMeasureToDelete(null)
+      onMeasureUpdate?.()
+    } catch (error: any) {
+      toast({
+        title: "Erro ao deletar medida",
+        description: error.message,
+        variant: "destructive",
+      })
+    }
+  }
+
   const handleClearValueClick = (entryId: number, measureTypeId: number) => {
     setValueToClear({ entryId, measureId: measureTypeId })
     setIsClearAlertOpen(true)
