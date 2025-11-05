@@ -59,7 +59,8 @@ export async function GET(request: NextRequest) {
         )
         if (value) {
           // Formatar número no padrão brasileiro (vírgula como separador decimal)
-          row.push(escapeCSV(formatNumberCSV(value.value / 100, 2))) // Dividir por 100 porque valores são inteiros (centímetros/miligramas)
+          // O valor já está armazenado como número inteiro (em centímetros, gramas, etc)
+          row.push(escapeCSV(formatNumberCSV(value.value, 0)))
         } else {
           row.push("")
         }
