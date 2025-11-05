@@ -3,7 +3,12 @@
 import { Sidebar } from "./Sidebar"
 import { useState, useEffect } from "react"
 
-export function MainLayout({ children }: { children: React.ReactNode }) {
+interface MainLayoutProps {
+  children: React.ReactNode
+  userIsAdmin?: boolean
+}
+
+export function MainLayout({ children, userIsAdmin = false }: MainLayoutProps) {
   const [isMounted, setIsMounted] = useState(false)
 
   useEffect(() => {
@@ -16,7 +21,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen bg-slate-950">
-      <Sidebar />
+      <Sidebar userIsAdmin={userIsAdmin} />
       <main className="ml-64 p-8">
         <div className="max-w-7xl mx-auto">{children}</div>
       </main>

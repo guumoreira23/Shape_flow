@@ -73,7 +73,7 @@ export default async function DashboardPage() {
     : null
 
   return (
-    <MainLayout>
+    <MainLayout userIsAdmin={userIsAdmin}>
       <div className="space-y-8">
         <div>
           <h1 className="text-3xl font-semibold text-white mb-2">Dashboard</h1>
@@ -145,36 +145,6 @@ export default async function DashboardPage() {
         </div>
       </div>
     </MainLayout>
-        </div>
-
-        {weightData.length > 0 && (
-          <div className="bg-slate-900 border border-slate-700 rounded-lg p-6 mb-8">
-            <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
-              <TrendingUp className="h-5 w-5" />
-              Evolução do Peso (últimos 7 dias)
-            </h2>
-            <WeightChart data={weightData} goal={weightGoal?.targetValue} />
-          </div>
-        )}
-
-        <div className="flex gap-4">
-          <Link href="/tracker">
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Gerenciar Medidas
-            </Button>
-          </Link>
-          {userIsAdmin && (
-            <Link href="/admin">
-              <Button variant="outline">
-                <Shield className="h-4 w-4 mr-2" />
-                Painel Admin
-              </Button>
-            </Link>
-          )}
-        </div>
-      </div>
-    </div>
   )
 }
 

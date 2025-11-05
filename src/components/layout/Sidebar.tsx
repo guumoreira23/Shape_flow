@@ -5,8 +5,6 @@ import { usePathname } from "next/navigation"
 import { LayoutDashboard, BarChart3, Users, LogOut } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { isAdmin } from "@/lib/auth/permissions"
-import { useState, useEffect } from "react"
 
 interface NavItem {
   title: string
@@ -34,13 +32,12 @@ const navItems: NavItem[] = [
   },
 ]
 
-export function Sidebar() {
-  const pathname = usePathname()
-  const [userIsAdmin, setUserIsAdmin] = useState(false)
+interface SidebarProps {
+  userIsAdmin?: boolean
+}
 
-  useEffect(() => {
-    isAdmin().then(setUserIsAdmin)
-  }, [])
+export function Sidebar({ userIsAdmin = false }: SidebarProps) {
+  const pathname = usePathname()
 
   const handleLogout = async () => {
     try {

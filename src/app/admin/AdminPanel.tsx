@@ -31,7 +31,11 @@ interface User {
   createdAt: string
 }
 
-export function AdminPanel() {
+interface AdminPanelProps {
+  userIsAdmin?: boolean
+}
+
+export function AdminPanel({ userIsAdmin = true }: AdminPanelProps) {
   const { toast } = useToast()
   const [users, setUsers] = useState<User[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -200,7 +204,7 @@ export function AdminPanel() {
   const userCount = users.filter((u) => u.role === "user").length
 
   return (
-    <MainLayout>
+    <MainLayout userIsAdmin={userIsAdmin}>
       <div className="space-y-8">
         <div>
           <div className="flex items-center gap-3 mb-2">
