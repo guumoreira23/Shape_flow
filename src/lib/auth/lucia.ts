@@ -31,7 +31,17 @@ declare module "lucia" {
 }
 
 export async function getSession() {
-  const sessionId = (await cookies()).get(lucia.sessionCookieName)?.value ?? null
+  const cookieStore = await cookies()
+  const sessionId = cookieStore.get(lucia.sessionCookieName)?.value ?? null
+  
+  // Log para debug (temporário para identificar o problema)
+  console.log("getSession - Cookie check:", {
+    cookieName: lucia.sessionCookieName,
+    hasSessionId: !!sessionId,
+    sessionIdLength: sessionId?.length || 0,
+    allCookies: cookieStore.getAll().map(c => c.name),
+  })
+  
   if (!sessionId) {
     return {
       user: null,
@@ -41,16 +51,14 @@ export async function getSession() {
 
   const result = await lucia.validateSession(sessionId)
   
-  // Log para debug (apenas em desenvolvimento)
-  if (process.env.NODE_ENV === "development") {
-    console.log("getSession - Validation result:", {
-      hasUser: !!result.user,
-      hasSession: !!result.session,
-      userId: result.user?.id,
-      userEmail: result.user?.email,
-      userRole: result.user?.role,
-    })
-  }
+  // Log para debug
+  console.log("getSession - Validation result:", {
+    hasUser: !!result.user,
+    hasSession: !!result.session,
+    userId: result.user?.id,
+    userEmail: result.user?.email,
+    userRole: result.user?.role,
+  })
   
   try {
     // Apenas atualizar cookie se a sessão for fresh (renovada)
