@@ -221,7 +221,6 @@ export function TrackerClient() {
                   onSelect={(date) => {
                     if (date) setSelectedDate(date)
                   }}
-                  locale={ptBR}
                   className="rounded-md border"
                 />
                 <div className="text-sm text-minimal-muted">
