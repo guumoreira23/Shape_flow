@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
         ...e,
         date: formatDate(e.date),
       })),
-      values,
+      values: allValues,
       goals: userGoals,
       today,
     })

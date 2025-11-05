@@ -244,6 +244,7 @@ export function TrackerClient() {
             values={values}
             goals={goals}
             onAddMeasure={() => setIsDialogOpen(true)}
+            onMeasureUpdate={loadData}
           />
         </div>
 
