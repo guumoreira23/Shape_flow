@@ -221,6 +221,52 @@ export function MeasuresGrid({
     setIsDeleteAlertOpen(true)
   }
 
+  const handleClearValueClick = (entryId: number, measureTypeId: number) => {
+    setValueToClear({ entryId, measureId: measureTypeId })
+    setIsClearAlertOpen(true)
+  }
+
+  const confirmClearValue = async () => {
+    if (!valueToClear) return
+
+    try {
+      const response = await fetch("/api/value", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          entryId: valueToClear.entryId, 
+          measureTypeId: valueToClear.measureId 
+        }),
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || "Erro ao limpar valor")
+      }
+
+      // Atualizar estado local
+      const key = `${valueToClear.entryId}-${valueToClear.measureId}`
+      setLocalValues((prev) => {
+        const newValues = { ...prev }
+        delete newValues[key]
+        return newValues
+      })
+
+      toast({
+        title: "Valor removido com sucesso!",
+      })
+      setIsClearAlertOpen(false)
+      setValueToClear(null)
+      onMeasureUpdate?.()
+    } catch (error: any) {
+      toast({
+        title: "Erro ao remover valor",
+        description: error.message,
+        variant: "destructive",
+      })
+    }
+  }
+
   return (
     <div className="w-full overflow-x-auto rounded-lg border border-slate-800/50">
       <div className="inline-block min-w-full">
