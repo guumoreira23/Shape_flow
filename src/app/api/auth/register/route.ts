@@ -44,16 +44,19 @@ export async function POST(request: NextRequest) {
         },
       }
     )
-  } catch (error) {
-    if (error instanceof Error && error.name === "ZodError") {
+  } catch (error: any) {
+    if (error?.name === "ZodError" || error?.issues) {
+      const zodError = error.issues || error.errors || []
+      const firstError = zodError[0]
+      const errorMessage = firstError?.message || "Dados inválidos"
       return NextResponse.json(
-        { error: "Dados inválidos", details: error },
+        { error: errorMessage, details: zodError },
         { status: 400 }
       )
     }
     console.error("Registration error:", error)
     return NextResponse.json(
-      { error: "Erro ao criar conta" },
+      { error: error?.message || "Erro ao criar conta" },
       { status: 500 }
     )
   }

@@ -18,7 +18,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Users, Shield, Trash2 } from "lucide-react"
+import { Users, Shield, Trash2, UserPlus } from "lucide-react"
+import { Input } from "@/components/ui/input"
 import { useToast } from "@/components/ui/use-toast"
 import { formatDateDisplay } from "@/lib/utils/date"
 
@@ -36,6 +37,10 @@ export function AdminPanel() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [newRole, setNewRole] = useState<"user" | "admin">("user")
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
+  const [newUserEmail, setNewUserEmail] = useState("")
+  const [newUserPassword, setNewUserPassword] = useState("")
+  const [newUserRole, setNewUserRole] = useState<"user" | "admin">("user")
 
   const loadUsers = async () => {
     try {
@@ -91,6 +96,56 @@ export function AdminPanel() {
     } catch (error) {
       toast({
         title: "Erro ao atualizar role",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const handleCreateUser = async () => {
+    if (!newUserEmail.trim() || !newUserPassword.trim()) {
+      toast({
+        title: "Preencha todos os campos",
+        variant: "destructive",
+      })
+      return
+    }
+
+    if (newUserPassword.length < 6) {
+      toast({
+        title: "Senha deve ter no mínimo 6 caracteres",
+        variant: "destructive",
+      })
+      return
+    }
+
+    try {
+      const response = await fetch("/api/admin/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: newUserEmail,
+          password: newUserPassword,
+          role: newUserRole,
+        }),
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || "Erro ao criar usuário")
+      }
+
+      toast({
+        title: "Usuário criado com sucesso!",
+      })
+      setIsCreateDialogOpen(false)
+      setNewUserEmail("")
+      setNewUserPassword("")
+      setNewUserRole("user")
+      loadUsers()
+    } catch (error: any) {
+      toast({
+        title: "Erro ao criar usuário",
+        description: error.message,
         variant: "destructive",
       })
     }
@@ -176,8 +231,66 @@ export function AdminPanel() {
         </div>
 
         <div className="bg-slate-900 border border-slate-700 rounded-lg">
-          <div className="p-6 border-b border-slate-700">
+          <div className="p-6 border-b border-slate-700 flex justify-between items-center">
             <h2 className="text-xl font-semibold text-white">Gerenciar Usuários</h2>
+            <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+              <DialogTrigger asChild>
+                <Button>
+                  <UserPlus className="h-4 w-4 mr-2" />
+                  Criar Usuário
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Criar Novo Usuário</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="newEmail">Email</Label>
+                    <Input
+                      id="newEmail"
+                      type="email"
+                      value={newUserEmail}
+                      onChange={(e) => setNewUserEmail(e.target.value)}
+                      placeholder="usuario@exemplo.com"
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="newPassword">Senha</Label>
+                    <Input
+                      id="newPassword"
+                      type="password"
+                      value={newUserPassword}
+                      onChange={(e) => setNewUserPassword(e.target.value)}
+                      placeholder="Mínimo 6 caracteres"
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="newUserRole">Role</Label>
+                    <Select
+                      value={newUserRole}
+                      onValueChange={(value: "user" | "admin") => setNewUserRole(value)}
+                    >
+                      <SelectTrigger id="newUserRole" className="mt-1">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="user">User</SelectItem>
+                        <SelectItem value="admin">Admin</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
+                    Cancelar
+                  </Button>
+                  <Button onClick={handleCreateUser}>Criar</Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full">

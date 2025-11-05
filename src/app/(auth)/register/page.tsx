@@ -34,12 +34,17 @@ export default function RegisterPage() {
         body: JSON.stringify({
           email: validatedData.email,
           password: validatedData.password,
+          confirmPassword: validatedData.confirmPassword,
         }),
       })
 
       const data = await response.json()
 
       if (!response.ok) {
+        // Se for erro de validação, lançar com detalhes
+        if (data.details) {
+          throw { message: data.error, details: data.details }
+        }
         throw new Error(data.error || "Erro ao criar conta")
       }
 
@@ -50,9 +55,21 @@ export default function RegisterPage() {
       router.push("/dashboard")
       router.refresh()
     } catch (error: any) {
+      let errorMessage = "Erro ao criar conta"
+      
+      if (error.message) {
+        errorMessage = error.message
+      } else if (error.details) {
+        // Se for erro de validação Zod
+        const firstError = Array.isArray(error.details) ? error.details[0] : null
+        if (firstError?.message) {
+          errorMessage = firstError.message
+        }
+      }
+      
       toast({
         title: "Erro ao criar conta",
-        description: error.message || "Verifique os dados informados",
+        description: errorMessage || "Verifique os dados informados",
         variant: "destructive",
       })
     } finally {
