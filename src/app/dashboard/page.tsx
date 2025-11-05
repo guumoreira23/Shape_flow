@@ -16,7 +16,13 @@ import { ExportButton } from "@/components/ui/export-button"
 
 export default async function DashboardPage() {
   const { user } = await requireAuth()
-  const userIsAdmin = await isAdmin()
+  let userIsAdmin = false
+  try {
+    userIsAdmin = await isAdmin()
+  } catch (error) {
+    console.error("Error checking admin status:", error)
+    // Continua como não-admin se houver erro
+  }
 
   const measures = await db.query.measurementTypes.findMany({
     where: (types, { eq }) => eq(types.userId, user.id),
