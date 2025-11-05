@@ -15,7 +15,10 @@ export const registerSchema = z.object({
 })
 
 export const createDateSchema = z.object({
-  date: z.string().optional(),
+  date: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Formato de data inválido (use YYYY-MM-DD)")
+    .optional(),
 })
 
 export const createValueSchema = z.object({

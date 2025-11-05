@@ -12,7 +12,23 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const validatedData = createDateSchema.parse(body)
 
-    const date = validatedData.date ? parseDate(validatedData.date) : getTodayDate()
+    let date: Date
+    if (validatedData.date) {
+      date = parseDate(validatedData.date)
+    } else {
+      date = getTodayDate()
+    }
+    
+    // Validar se a data não é muito no futuro (máximo 1 ano)
+    const maxDate = new Date()
+    maxDate.setFullYear(maxDate.getFullYear() + 1)
+    if (date > maxDate) {
+      return NextResponse.json(
+        { error: "Data não pode ser mais de 1 ano no futuro" },
+        { status: 400 }
+      )
+    }
+    
     const dateString = formatDate(date)
 
     const existingEntry = await db.query.measurementEntries.findFirst({

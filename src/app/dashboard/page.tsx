@@ -11,6 +11,7 @@ import { formatDateDisplay, formatDate } from "@/lib/utils/date"
 import { WeightChart } from "@/components/charts/WeightChart"
 import { MultiLineChart } from "@/components/charts/MultiLineChart"
 import { MainLayout } from "@/components/layout/MainLayout"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export default async function DashboardPage() {
   const { user } = await requireAuth()

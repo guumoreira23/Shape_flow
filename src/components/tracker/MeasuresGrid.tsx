@@ -11,6 +11,17 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { Label } from "@/components/ui/label"
 import { Plus, ChartLine, Pencil, Trash2, X } from "lucide-react"
 import { formatDateDisplay } from "@/lib/utils/date"
@@ -62,8 +73,10 @@ export function MeasuresGrid({
   const [pendingValues, setPendingValues] = useState<Set<string>>(new Set())
   const [editingMeasure, setEditingMeasure] = useState<Measure | null>(null)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [measureToDelete, setMeasureToDelete] = useState<Measure | null>(null)
+  const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false)
+  const [valueToClear, setValueToClear] = useState<{ entryId: number; measureId: number } | null>(null)
+  const [isClearAlertOpen, setIsClearAlertOpen] = useState(false)
   const [editMeasureName, setEditMeasureName] = useState("")
   const [editMeasureUnit, setEditMeasureUnit] = useState("")
   const abortControllersRef = useRef<Map<string, AbortController>>(new Map())
@@ -267,7 +280,7 @@ export function MeasuresGrid({
                               variant="ghost"
                               size="sm"
                               className="h-9 w-9 p-0 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500/20 hover:text-red-400"
-                              onClick={() => handleClearValue(entry.id, measure.id)}
+                              onClick={() => handleClearValueClick(entry.id, measure.id)}
                               title="Limpar valor"
                             >
                               <X className="h-4 w-4" />
@@ -319,25 +332,46 @@ export function MeasuresGrid({
         </DialogContent>
       </Dialog>
 
-      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Confirmar Exclusão</DialogTitle>
-          </DialogHeader>
-          <p className="text-minimal-muted">
-            Tem certeza que deseja excluir a medida "{measureToDelete?.name}"? 
-            Esta ação não pode ser desfeita e todos os valores associados serão perdidos.
-          </p>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
-              Cancelar
-            </Button>
-            <Button variant="destructive" onClick={confirmDelete}>
+      <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir a medida "{measureToDelete?.name}"? 
+              Esta ação não pode ser desfeita e todos os valores associados serão perdidos.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-red-600 hover:bg-red-700"
+            >
               Excluir
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={isClearAlertOpen} onOpenChange={setIsClearAlertOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Limpar Valor</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja remover este valor? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmClearValue}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Limpar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

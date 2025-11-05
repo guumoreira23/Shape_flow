@@ -15,13 +15,25 @@ export async function GET(request: NextRequest) {
     })
 
     // Buscar todas as entradas (sem limite para histórico completo)
+    // Ordenar por data descendente para obter as mais recentes primeiro
     const entries = await db.query.measurementEntries.findMany({
       where: (measurementEntries, { eq }) =>
         eq(measurementEntries.userId, user.id),
       orderBy: (measurementEntries, { desc }) => [desc(measurementEntries.date)],
     })
 
-    // Buscar todos os valores (não apenas das últimas 60 entradas)
+    // Se não houver entradas, retornar vazio
+    if (entries.length === 0) {
+      return NextResponse.json({
+        measures,
+        entries: [],
+        values: [],
+        goals: userGoals,
+        today: formatDate(getTodayDate()),
+      })
+    }
+
+    // Buscar todos os valores de uma vez (mais eficiente)
     const allValues = await db.query.measurementValues.findMany({
       where: (measurementValues, { inArray }) =>
         inArray(

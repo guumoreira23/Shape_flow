@@ -23,6 +23,18 @@ import { Input } from "@/components/ui/input"
 import { useToast } from "@/components/ui/use-toast"
 import { formatDateDisplay } from "@/lib/utils/date"
 import { MainLayout } from "@/components/layout/MainLayout"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import { Skeleton } from "@/components/ui/skeleton"
 
 interface User {
   id: string
@@ -46,6 +58,8 @@ export function AdminPanel({ userIsAdmin = true }: AdminPanelProps) {
   const [newUserEmail, setNewUserEmail] = useState("")
   const [newUserPassword, setNewUserPassword] = useState("")
   const [newUserRole, setNewUserRole] = useState<"user" | "admin">("user")
+  const [userToDelete, setUserToDelete] = useState<User | null>(null)
+  const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false)
 
   const loadUsers = async () => {
     try {
@@ -156,13 +170,16 @@ export function AdminPanel({ userIsAdmin = true }: AdminPanelProps) {
     }
   }
 
-  const handleDeleteUser = async (userId: string, email: string) => {
-    if (!confirm(`Tem certeza que deseja deletar o usuário ${email}?`)) {
-      return
-    }
+  const handleDeleteUserClick = (user: User) => {
+    setUserToDelete(user)
+    setIsDeleteAlertOpen(true)
+  }
+
+  const confirmDeleteUser = async () => {
+    if (!userToDelete) return
 
     try {
-      const response = await fetch(`/api/admin/users/${userId}`, {
+      const response = await fetch(`/api/admin/users/${userToDelete.id}`, {
         method: "DELETE",
       })
 
@@ -174,6 +191,8 @@ export function AdminPanel({ userIsAdmin = true }: AdminPanelProps) {
       toast({
         title: "Usuário deletado com sucesso!",
       })
+      setIsDeleteAlertOpen(false)
+      setUserToDelete(null)
       loadUsers()
     } catch (error: any) {
       toast({
@@ -193,8 +212,17 @@ export function AdminPanel({ userIsAdmin = true }: AdminPanelProps) {
   if (isLoading) {
     return (
       <MainLayout>
-        <div className="flex items-center justify-center h-64">
-          <p className="text-minimal-muted">Carregando...</p>
+        <div className="space-y-8">
+          <div className="space-y-2">
+            <Skeleton className="h-10 w-64" />
+            <Skeleton className="h-5 w-96" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} className="h-32" />
+            ))}
+          </div>
+          <Skeleton className="h-96 w-full" />
         </div>
       </MainLayout>
     )
@@ -353,13 +381,35 @@ export function AdminPanel({ userIsAdmin = true }: AdminPanelProps) {
                         >
                           Editar Role
                         </Button>
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => handleDeleteUser(user.id, user.email)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => handleDeleteUserClick(user)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Tem certeza que deseja deletar o usuário <strong>{user.email}</strong>? 
+                                Esta ação não pode ser desfeita e todos os dados do usuário serão perdidos.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={confirmDeleteUser}
+                                className="bg-red-600 hover:bg-red-700"
+                              >
+                                Excluir
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       </div>
                     </td>
                   </tr>
@@ -403,6 +453,27 @@ export function AdminPanel({ userIsAdmin = true }: AdminPanelProps) {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
+              <AlertDialogDescription>
+                Tem certeza que deseja deletar o usuário <strong>{userToDelete?.email}</strong>? 
+                Esta ação não pode ser desfeita e todos os dados do usuário serão perdidos.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={confirmDeleteUser}
+                className="bg-red-600 hover:bg-red-700"
+              >
+                Excluir
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </MainLayout>
   )

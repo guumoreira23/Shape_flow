@@ -34,6 +34,19 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const validatedData = createMeasureTypeSchema.parse(body)
 
+    // Verificar se já existe medida com o mesmo nome para o usuário
+    const existingMeasure = await db.query.measurementTypes.findFirst({
+      where: (types, { eq, and }) =>
+        and(eq(types.userId, user.id), eq(types.name, validatedData.name)),
+    })
+
+    if (existingMeasure) {
+      return NextResponse.json(
+        { error: "Já existe uma medida com este nome" },
+        { status: 400 }
+      )
+    }
+
     const [newMeasureType] = await db
       .insert(measurementTypes)
       .values({

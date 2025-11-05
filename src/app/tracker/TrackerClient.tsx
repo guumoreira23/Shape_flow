@@ -14,12 +14,15 @@ import {
   DialogTrigger,
   DialogFooter,
 } from "@/components/ui/dialog"
-import { Plus, Download } from "lucide-react"
+import { Plus, Download, Upload } from "lucide-react"
 import { MainLayout } from "@/components/layout/MainLayout"
 import { useToast } from "@/components/ui/use-toast"
 import { getTodayDate, formatDate, parseDate } from "@/lib/utils/date"
 import { Calendar } from "@/components/ui/calendar"
 import { format } from "date-fns"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 
 interface Measure {
   id: number
@@ -55,6 +58,9 @@ export function TrackerClient() {
   const [isLoading, setIsLoading] = useState(true)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isDateDialogOpen, setIsDateDialogOpen] = useState(false)
+  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false)
+  const [isImporting, setIsImporting] = useState(false)
+  const [csvContent, setCsvContent] = useState("")
   const [selectedDate, setSelectedDate] = useState<Date>(new Date())
   const [newMeasureName, setNewMeasureName] = useState("")
   const [newMeasureUnit, setNewMeasureUnit] = useState("")
@@ -140,6 +146,65 @@ export function TrackerClient() {
     }
   }
 
+  const handleImportCSV = async () => {
+    if (!csvContent.trim()) {
+      toast({
+        title: "CSV vazio",
+        description: "Por favor, cole o conteúdo do CSV",
+        variant: "destructive",
+      })
+      return
+    }
+
+    setIsImporting(true)
+    try {
+      const response = await fetch("/api/import/csv", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ csv: csvContent }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || "Erro ao importar CSV")
+      }
+
+      toast({
+        title: "Importação concluída!",
+        description: data.message || `${data.imported} linha(s) importada(s)`,
+      })
+
+      if (data.errors && data.errors.length > 0) {
+        console.warn("Erros durante importação:", data.errors)
+      }
+
+      setIsImportDialogOpen(false)
+      setCsvContent("")
+      loadData()
+    } catch (error: any) {
+      toast({
+        title: "Erro ao importar CSV",
+        description: error.message || "Verifique o formato do arquivo",
+        variant: "destructive",
+      })
+    } finally {
+      setIsImporting(false)
+    }
+  }
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      const content = event.target?.result as string
+      setCsvContent(content)
+    }
+    reader.readAsText(file, "UTF-8")
+  }
+
   const handleAddDate = async () => {
     try {
       const dateString = formatDate(selectedDate)
@@ -188,8 +253,14 @@ export function TrackerClient() {
   if (isLoading) {
     return (
       <MainLayout>
-        <div className="flex items-center justify-center h-64">
-          <p className="text-minimal-muted">Carregando...</p>
+        <div className="space-y-6">
+          <div className="space-y-2">
+            <Skeleton className="h-10 w-64" />
+            <Skeleton className="h-5 w-96" />
+          </div>
+          <div className="card-minimal p-6">
+            <Skeleton className="h-96 w-full" />
+          </div>
         </div>
       </MainLayout>
     )
@@ -246,6 +317,56 @@ export function TrackerClient() {
               <Download className="h-4 w-4" />
               Exportar CSV
             </Button>
+            <Dialog open={isImportDialogOpen} onOpenChange={setIsImportDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="gap-2">
+                  <Upload className="h-4 w-4" />
+                  Importar CSV
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>Importar Dados de CSV</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="csvFile">Enviar arquivo CSV</Label>
+                    <Input
+                      id="csvFile"
+                      type="file"
+                      accept=".csv"
+                      onChange={handleFileUpload}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="csvContent">Ou cole o conteúdo do CSV</Label>
+                    <textarea
+                      id="csvContent"
+                      value={csvContent}
+                      onChange={(e) => setCsvContent(e.target.value)}
+                      placeholder="Data;Peso (kg);Cintura (cm)&#10;15/01/2025;75;85"
+                      className="mt-1 w-full h-48 p-3 rounded-lg border border-slate-800 bg-slate-900/50 text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50"
+                    />
+                  </div>
+                  <div className="text-sm text-minimal-muted space-y-1">
+                    <p><strong>Formato esperado:</strong></p>
+                    <p>• Primeira linha: cabeçalho com "Data" e nomes das medidas</p>
+                    <p>• Delimitador: ponto e vírgula (;) ou vírgula (,)</p>
+                    <p>• Data: formato DD/MM/YYYY</p>
+                    <p>• Valores: números com vírgula como separador decimal (ex: 75,5)</p>
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setIsImportDialogOpen(false)}>
+                    Cancelar
+                  </Button>
+                  <Button onClick={handleImportCSV} disabled={isImporting || !csvContent.trim()}>
+                    {isImporting ? "Importando..." : "Importar"}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
 
