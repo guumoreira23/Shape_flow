@@ -35,6 +35,7 @@ interface MeasureChartClientProps {
   data: Array<{ date: string; value: number }>
   goal: Goal | undefined
   measureId: number
+  userIsAdmin?: boolean
 }
 
 export function MeasureChartClient({
@@ -42,6 +43,7 @@ export function MeasureChartClient({
   data,
   goal,
   measureId,
+  userIsAdmin = false,
 }: MeasureChartClientProps) {
   const router = useRouter()
   const { toast } = useToast()
@@ -87,7 +89,7 @@ export function MeasureChartClient({
   }
 
   return (
-    <MainLayout>
+    <MainLayout userIsAdmin={userIsAdmin}>
       <div className="space-y-6">
         <div className="flex justify-between items-start">
           <div className="flex items-center gap-4">

@@ -46,7 +46,11 @@ interface Goal {
   targetValue: number
 }
 
-export function TrackerClient() {
+interface TrackerClientProps {
+  userIsAdmin?: boolean
+}
+
+export function TrackerClient({ userIsAdmin = false }: TrackerClientProps) {
   const router = useRouter()
   const { toast } = useToast()
   const [measures, setMeasures] = useState<Measure[]>([])
@@ -251,7 +255,7 @@ export function TrackerClient() {
 
   if (isLoading) {
     return (
-      <MainLayout>
+      <MainLayout userIsAdmin={userIsAdmin}>
         <div className="space-y-6">
           <div className="space-y-2">
             <Skeleton className="h-10 w-64" />
@@ -266,7 +270,7 @@ export function TrackerClient() {
   }
 
   return (
-    <MainLayout>
+    <MainLayout userIsAdmin={userIsAdmin}>
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>

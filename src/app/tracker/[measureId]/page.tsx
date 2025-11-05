@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation"
 import { requireAuth } from "@/lib/auth/middleware"
+import { isAdmin } from "@/lib/auth/permissions"
 import { db } from "@/db"
 import { measurementTypes, measurementEntries, measurementValues, goals } from "@/db/schema"
 import { eq, and } from "drizzle-orm"
@@ -11,6 +12,7 @@ export default async function MeasureDetailPage({
   params: Promise<{ measureId: string }>
 }) {
   const { user } = await requireAuth()
+  const userIsAdmin = await isAdmin()
   const { measureId } = await params
   const id = parseInt(measureId, 10)
 
@@ -63,6 +65,7 @@ export default async function MeasureDetailPage({
       data={chartData}
       goal={goal}
       measureId={id}
+      userIsAdmin={userIsAdmin}
     />
   )
 }
