@@ -60,7 +60,8 @@ export default function LoginPage() {
       }
 
       // Aguardar para garantir que o cookie seja processado pelo navegador
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      // Aumentar delay para garantir que o cookie seja totalmente processado
+      await new Promise((resolve) => setTimeout(resolve, 2000))
       
       // Verificar autenticação antes de redirecionar
       try {
@@ -74,6 +75,8 @@ export default function LoginPage() {
           toast({
             title: "Login realizado com sucesso!",
           })
+          // Aguardar um pouco mais antes de redirecionar para garantir que tudo está pronto
+          await new Promise((resolve) => setTimeout(resolve, 500))
           // Usar window.location.href para forçar um hard reload e garantir que o cookie seja enviado
           window.location.href = "/dashboard"
         } else {
