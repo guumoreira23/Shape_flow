@@ -105,6 +105,7 @@ export function TrackerClient() {
 
   useEffect(() => {
     loadData()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handleAddMeasure = async () => {
@@ -349,7 +350,7 @@ export function TrackerClient() {
                   </div>
                   <div className="text-sm text-minimal-muted space-y-1">
                     <p><strong>Formato esperado:</strong></p>
-                    <p>• Primeira linha: cabeçalho com "Data" e nomes das medidas</p>
+                    <p>• Primeira linha: cabeçalho com &quot;Data&quot; e nomes das medidas</p>
                     <p>• Delimitador: ponto e vírgula (;) ou vírgula (,)</p>
                     <p>• Data: formato DD/MM/YYYY</p>
                     <p>• Valores: números com vírgula como separador decimal (ex: 75,5)</p>

@@ -337,7 +337,7 @@ export function MeasuresGrid({
           <AlertDialogHeader>
             <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
             <AlertDialogDescription>
-              Tem certeza que deseja excluir a medida "{measureToDelete?.name}"? 
+              Tem certeza que deseja excluir a medida &quot;{measureToDelete?.name}&quot;? 
               Esta ação não pode ser desfeita e todos os valores associados serão perdidos.
             </AlertDialogDescription>
           </AlertDialogHeader>

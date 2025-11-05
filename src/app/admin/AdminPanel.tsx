@@ -91,6 +91,7 @@ export function AdminPanel({ userIsAdmin = true }: AdminPanelProps) {
 
   useEffect(() => {
     loadUsers()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handleUpdateRole = async () => {
