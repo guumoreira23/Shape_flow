@@ -5,7 +5,7 @@ import { measurementTypes, measurementEntries, measurementValues, goals } from "
 import { eq, desc } from "drizzle-orm"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Plus, TrendingUp, Shield, ArrowRight } from "lucide-react"
+import { Plus, TrendingUp, Shield, ArrowRight, Download } from "lucide-react"
 import { formatNumber } from "@/lib/utils/number"
 import { formatDateDisplay, formatDate } from "@/lib/utils/date"
 import { WeightChart } from "@/components/charts/WeightChart"
@@ -230,6 +230,16 @@ export default async function DashboardPage() {
               <ArrowRight className="h-4 w-4" />
             </Button>
           </Link>
+          <Button
+            variant="outline"
+            className="gap-2"
+            onClick={() => {
+              window.location.href = "/api/export/csv"
+            }}
+          >
+            <Download className="h-4 w-4" />
+            Exportar Dados (CSV)
+          </Button>
           {userIsAdmin && (
             <Link href="/admin">
               <Button variant="outline" className="gap-2">

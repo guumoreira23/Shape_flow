@@ -14,7 +14,7 @@ import {
   DialogTrigger,
   DialogFooter,
 } from "@/components/ui/dialog"
-import { Plus } from "lucide-react"
+import { Plus, Download } from "lucide-react"
 import { MainLayout } from "@/components/layout/MainLayout"
 import { useToast } from "@/components/ui/use-toast"
 import { getTodayDate, formatDate, parseDate } from "@/lib/utils/date"
@@ -203,13 +203,26 @@ export function TrackerClient() {
             <h1 className="text-3xl font-semibold text-white mb-2">Tracker de Medidas</h1>
             <p className="text-minimal-muted">Gerencie suas medidas corporais</p>
           </div>
-          <Dialog open={isDateDialogOpen} onOpenChange={setIsDateDialogOpen}>
-            <DialogTrigger asChild>
-              <Button variant="outline" className="gap-2">
-                <Plus className="h-4 w-4" />
-                Adicionar Data
-              </Button>
-            </DialogTrigger>
+          <div className="flex gap-2">
+            <Dialog open={isDateDialogOpen} onOpenChange={setIsDateDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="gap-2">
+                  <Plus className="h-4 w-4" />
+                  Adicionar Data
+                </Button>
+              </DialogTrigger>
+            </Dialog>
+            <Button
+              variant="outline"
+              className="gap-2"
+              onClick={() => {
+                window.location.href = "/api/export/csv"
+              }}
+            >
+              <Download className="h-4 w-4" />
+              Exportar CSV
+            </Button>
+          </div>
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Selecionar Data</DialogTitle>
