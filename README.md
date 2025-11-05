@@ -176,6 +176,19 @@ src/
 - Senhas hasheadas com Argon2
 - Cookies de sessão seguros em produção
 
+## 🎨 Design
+
+O design do ShapeFlow é baseado no **Minimal Dashboard** da MUI:
+- Referência: https://mui.com/store/previews/minimal-dashboard/
+- Ver `DESIGN_GUIDELINES.md` para detalhes completos
+
+### Características do Design
+- Interface minimalista e limpa
+- Espaçamento generoso
+- Tipografia clara e hierárquica
+- Cores suaves e profissionais
+- Componentes elegantes com bordas sutis
+
 ## 🎨 Melhores Práticas Implementadas
 
 - ✅ Server Components para busca inicial de dados
