@@ -64,8 +64,11 @@ export default function LoginPage() {
         title: "Login realizado com sucesso!",
       })
 
-      router.push("/dashboard")
-      router.refresh()
+      // Aguardar um pouco para garantir que o cookie seja processado
+      await new Promise((resolve) => setTimeout(resolve, 100))
+      
+      // Usar window.location para garantir que a navegação aconteça com os cookies
+      window.location.href = "/dashboard"
     } catch (error: any) {
       toast({
         title: "Erro ao fazer login",
