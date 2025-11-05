@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/db"
 import { users } from "@/db/schema"
-import { sql } from "drizzle-orm"
 import { hashPassword } from "@/lib/auth/password"
 import { generateId } from "lucia"
+import postgres from "postgres"
 
 // Rota temporária para setup inicial
 // TODO: Remover após configuração inicial
@@ -23,7 +23,10 @@ export async function POST(request: NextRequest) {
 
     // Primeiro, adicionar coluna role se não existir
     try {
-      await db.execute(sql`
+      const connectionString = process.env.DATABASE_URL!
+      const sql = postgres(connectionString)
+      
+      await sql`
         DO $$ 
         BEGIN
           IF NOT EXISTS (
@@ -33,7 +36,9 @@ export async function POST(request: NextRequest) {
             ALTER TABLE users ADD COLUMN role TEXT NOT NULL DEFAULT 'user';
           END IF;
         END $$;
-      `)
+      `
+      
+      await sql.end()
     } catch (error: any) {
       // Coluna pode já existir, ignorar
       console.log("Column role setup:", error.message)
@@ -54,7 +59,7 @@ export async function POST(request: NextRequest) {
       await db
         .update(users)
         .set({ role: "admin" })
-        .where(sql`id = ${existingUser.id}`)
+        .where((users, { eq }) => eq(users.id, existingUser.id))
 
       return NextResponse.json({
         success: true,
