@@ -1,4 +1,3 @@
-import { redirect } from "next/navigation"
 import { requireAuth } from "@/lib/auth/middleware"
 import { db } from "@/db"
 import { measurementTypes, measurementEntries, measurementValues, goals } from "@/db/schema"
@@ -9,28 +8,6 @@ import { LogOut, Plus, TrendingUp } from "lucide-react"
 import { formatNumber } from "@/lib/utils/number"
 import { formatDateDisplay } from "@/lib/utils/date"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
-
-async function logout() {
-  "use server"
-  try {
-    const { lucia } = await import("@/lib/auth/lucia")
-    const { cookies } = await import("next/headers")
-    
-    const cookieStore = await cookies()
-    const sessionId = cookieStore.get(lucia.sessionCookieName)?.value ?? null
-
-    if (sessionId) {
-      await lucia.invalidateSession(sessionId)
-    }
-
-    const sessionCookie = lucia.createBlankSessionCookie()
-    cookieStore.set(sessionCookie.name, sessionCookie.value, sessionCookie.attributes)
-  } catch (error) {
-    console.error("Logout error:", error)
-  }
-  
-  redirect("/login")
-}
 
 export default async function DashboardPage() {
   const { user } = await requireAuth()
@@ -97,7 +74,7 @@ export default async function DashboardPage() {
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-white">Dashboard</h1>
-          <form action={logout}>
+          <form action="/api/auth/logout" method="POST">
             <Button type="submit" variant="outline" size="sm">
               <LogOut className="h-4 w-4 mr-2" />
               Sair
