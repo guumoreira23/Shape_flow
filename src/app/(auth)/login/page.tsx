@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -14,7 +13,6 @@ const REMEMBER_ME_KEY = "shapeflow_remember_me"
 const REMEMBERED_EMAIL_KEY = "shapeflow_remembered_email"
 
 export default function LoginPage() {
-  const router = useRouter()
   const { toast } = useToast()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -61,8 +59,8 @@ export default function LoginPage() {
         localStorage.removeItem(REMEMBERED_EMAIL_KEY)
       }
 
-      // Aguardar um pouco para garantir que o cookie seja processado pelo navegador
-      await new Promise((resolve) => setTimeout(resolve, 500))
+      // Aguardar para garantir que o cookie seja processado pelo navegador
+      await new Promise((resolve) => setTimeout(resolve, 1000))
       
       // Verificar autenticação antes de redirecionar
       try {
@@ -76,14 +74,8 @@ export default function LoginPage() {
           toast({
             title: "Login realizado com sucesso!",
           })
-          // Usar router.push seguido de window.location para garantir que funcione
-          router.push("/dashboard")
-          // Fallback: se o router não funcionar, usar window.location após um delay
-          setTimeout(() => {
-            if (window.location.pathname === "/login") {
-              window.location.href = "/dashboard"
-            }
-          }, 1000)
+          // Usar window.location.href para forçar um hard reload e garantir que o cookie seja enviado
+          window.location.href = "/dashboard"
         } else {
           throw new Error("Falha na autenticação. Tente novamente.")
         }
