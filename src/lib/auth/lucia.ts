@@ -40,6 +40,18 @@ export async function getSession() {
   }
 
   const result = await lucia.validateSession(sessionId)
+  
+  // Log para debug (apenas em desenvolvimento)
+  if (process.env.NODE_ENV === "development") {
+    console.log("getSession - Validation result:", {
+      hasUser: !!result.user,
+      hasSession: !!result.session,
+      userId: result.user?.id,
+      userEmail: result.user?.email,
+      userRole: result.user?.role,
+    })
+  }
+  
   try {
     if (result.session && result.session.fresh) {
       const cookieStore = await cookies()
@@ -57,8 +69,9 @@ export async function getSession() {
         ...sessionCookie.attributes,
       })
     }
-  } catch {
+  } catch (error) {
     // Next.js throws error when attempting to set cookies during rendering
+    console.error("getSession - Cookie error:", error)
   }
   return result
 }
