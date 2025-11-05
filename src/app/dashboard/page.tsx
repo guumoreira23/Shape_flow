@@ -7,8 +7,9 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Plus, TrendingUp, Shield, ArrowRight } from "lucide-react"
 import { formatNumber } from "@/lib/utils/number"
-import { formatDateDisplay } from "@/lib/utils/date"
+import { formatDateDisplay, formatDate } from "@/lib/utils/date"
 import { WeightChart } from "@/components/charts/WeightChart"
+import { MultiLineChart } from "@/components/charts/MultiLineChart"
 import { MainLayout } from "@/components/layout/MainLayout"
 
 export default async function DashboardPage() {
@@ -72,6 +73,45 @@ export default async function DashboardPage() {
     ? userGoals.find((g) => g.measureTypeId === weightMeasure.id)
     : null
 
+  // Calcular diferença entre valor atual e meta
+  const getDifference = (measureId: number, goalValue: number | undefined) => {
+    if (!goalValue) return null
+    const currentValue = getLatestValue(measureId)
+    if (currentValue === null) return null
+    const diff = currentValue - goalValue
+    return diff
+  }
+
+  const weightDifference = weightMeasure && weightGoal
+    ? getDifference(weightMeasure.id, weightGoal.targetValue)
+    : null
+
+  const waistGoal = waistMeasure
+    ? userGoals.find((g) => g.measureTypeId === waistMeasure.id)
+    : null
+
+  const waistDifference = waistMeasure && waistGoal
+    ? getDifference(waistMeasure.id, waistGoal.targetValue)
+    : null
+
+  // Preparar dados para gráfico múltiplo (Peso e Cintura)
+  const multiChartData = entries
+    .slice(-30) // Últimos 30 dias
+    .map((entry) => {
+      const weightValue = values.find(
+        (v) => v.entryId === entry.id && weightMeasure && v.measureTypeId === weightMeasure.id
+      )
+      const waistValue = values.find(
+        (v) => v.entryId === entry.id && waistMeasure && v.measureTypeId === waistMeasure.id
+      )
+      return {
+        date: formatDate(entry.date),
+        peso: weightValue ? weightValue.value : null,
+        cintura: waistValue ? waistValue.value : null,
+      }
+    })
+    .filter((d) => d.peso !== null || d.cintura !== null)
+
   return (
     <MainLayout userIsAdmin={userIsAdmin}>
       <div className="space-y-8">
@@ -89,9 +129,19 @@ export default async function DashboardPage() {
                 : "N/A"}
             </p>
             {weightGoal && weightMeasure && (
-              <p className="text-sm text-minimal-muted mt-2">
-                Meta: <span className="text-blue-400 font-medium">{weightGoal.targetValue} {weightMeasure.unit}</span>
-              </p>
+              <div className="mt-2 space-y-1">
+                <p className="text-sm text-minimal-muted">
+                  Meta: <span className="text-blue-400 font-medium">{weightGoal.targetValue} {weightMeasure.unit}</span>
+                </p>
+                {weightDifference !== null && (
+                  <p className={`text-sm font-medium ${
+                    weightDifference > 0 ? "text-red-400" : weightDifference < 0 ? "text-green-400" : "text-blue-400"
+                  }`}>
+                    {weightDifference > 0 ? "+" : ""}{formatNumber(weightDifference)} {weightMeasure.unit}
+                    {weightDifference > 0 ? " acima da meta" : weightDifference < 0 ? " abaixo da meta" : " na meta"}
+                  </p>
+                )}
+              </div>
             )}
           </div>
 
@@ -102,6 +152,21 @@ export default async function DashboardPage() {
                 ? `${formatNumber(getLatestValue(waistMeasure.id)!)} ${waistMeasure.unit}`
                 : "N/A"}
             </p>
+            {waistGoal && waistMeasure && (
+              <div className="mt-2 space-y-1">
+                <p className="text-sm text-minimal-muted">
+                  Meta: <span className="text-blue-400 font-medium">{waistGoal.targetValue} {waistMeasure.unit}</span>
+                </p>
+                {waistDifference !== null && (
+                  <p className={`text-sm font-medium ${
+                    waistDifference > 0 ? "text-red-400" : waistDifference < 0 ? "text-green-400" : "text-blue-400"
+                  }`}>
+                    {waistDifference > 0 ? "+" : ""}{formatNumber(waistDifference)} {waistMeasure.unit}
+                    {waistDifference > 0 ? " acima da meta" : waistDifference < 0 ? " abaixo da meta" : " na meta"}
+                  </p>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="card-minimal p-6">
@@ -123,6 +188,37 @@ export default async function DashboardPage() {
               </div>
             </div>
             <WeightChart data={weightData} goal={weightGoal?.targetValue} />
+          </div>
+        )}
+
+        {multiChartData.length > 0 && weightMeasure && waistMeasure && (
+          <div className="card-minimal p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-xl font-semibold text-white mb-1 flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5 text-blue-400" />
+                  Comparativo Peso e Cintura
+                </h2>
+                <p className="text-sm text-minimal-muted">Últimos 30 dias</p>
+              </div>
+            </div>
+            <MultiLineChart
+              data={multiChartData}
+              lines={[
+                {
+                  dataKey: "peso",
+                  name: "Peso",
+                  color: "#3b82f6",
+                  unit: weightMeasure.unit,
+                },
+                {
+                  dataKey: "cintura",
+                  name: "Cintura",
+                  color: "#10b981",
+                  unit: waistMeasure.unit,
+                },
+              ]}
+            />
           </div>
         )}
 

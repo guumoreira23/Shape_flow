@@ -4,8 +4,17 @@ import { useState, useEffect, useCallback, useRef } from "react"
 import Link from "next/link"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Plus, ChartLine } from "lucide-react"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog"
+import { Label } from "@/components/ui/label"
+import { Plus, ChartLine, Pencil, Trash2, X } from "lucide-react"
 import { formatDateDisplay } from "@/lib/utils/date"
+import { useToast } from "@/components/ui/use-toast"
 
 interface Measure {
   id: number
@@ -37,6 +46,7 @@ interface MeasuresGridProps {
   values: Value[]
   goals: Goal[]
   onAddMeasure: () => void
+  onMeasureUpdate?: () => void
 }
 
 export function MeasuresGrid({
@@ -45,9 +55,17 @@ export function MeasuresGrid({
   values,
   goals,
   onAddMeasure,
+  onMeasureUpdate,
 }: MeasuresGridProps) {
+  const { toast } = useToast()
   const [localValues, setLocalValues] = useState<Record<string, number>>({})
   const [pendingValues, setPendingValues] = useState<Set<string>>(new Set())
+  const [editingMeasure, setEditingMeasure] = useState<Measure | null>(null)
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [measureToDelete, setMeasureToDelete] = useState<Measure | null>(null)
+  const [editMeasureName, setEditMeasureName] = useState("")
+  const [editMeasureUnit, setEditMeasureUnit] = useState("")
   const abortControllersRef = useRef<Map<string, AbortController>>(new Map())
   const debounceTimersRef = useRef<Map<string, NodeJS.Timeout>>(new Map())
 
@@ -178,15 +196,41 @@ export function MeasuresGrid({
                       <div className="flex items-center gap-2">
                         <Link 
                           href={`/tracker/${measure.id}`}
-                          className="font-medium text-white hover:text-blue-400 transition-colors cursor-pointer"
+                          className="font-medium text-white hover:text-blue-400 transition-colors cursor-pointer flex-1"
                         >
                           {measure.name}
                         </Link>
-                        <Link href={`/tracker/${measure.id}`}>
-                          <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-slate-800">
-                            <ChartLine className="h-3.5 w-3.5" />
+                        <div className="flex items-center gap-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 w-6 p-0 hover:bg-slate-800"
+                            onClick={(e) => {
+                              e.preventDefault()
+                              handleEditMeasure(measure)
+                            }}
+                            title="Renomear medida"
+                          >
+                            <Pencil className="h-3.5 w-3.5" />
                           </Button>
-                        </Link>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 w-6 p-0 hover:bg-red-500/20 hover:text-red-400"
+                            onClick={(e) => {
+                              e.preventDefault()
+                              handleDeleteMeasure(measure)
+                            }}
+                            title="Excluir medida"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                          <Link href={`/tracker/${measure.id}`}>
+                            <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-slate-800" title="Ver gráfico">
+                              <ChartLine className="h-3.5 w-3.5" />
+                            </Button>
+                          </Link>
+                        </div>
                       </div>
                       <span className="text-xs text-minimal-muted">
                         {measure.unit}
@@ -204,19 +248,32 @@ export function MeasuresGrid({
                     return (
                       <td
                         key={entry.id}
-                        className="border-r border-slate-800/50 px-2 py-2 bg-slate-950/50"
+                        className="border-r border-slate-800/50 px-2 py-2 bg-slate-950/50 relative group"
                       >
-                        <Input
-                          type="number"
-                          value={value}
-                          onChange={(e) =>
-                            handleCellChange(entry.id, measure.id, e.target.value)
-                          }
-                          className={`h-9 text-center text-sm bg-slate-900/50 border-slate-800 ${
-                            isPending ? "opacity-50" : ""
-                          }`}
-                          placeholder="-"
-                        />
+                        <div className="flex items-center gap-1">
+                          <Input
+                            type="number"
+                            value={value}
+                            onChange={(e) =>
+                              handleCellChange(entry.id, measure.id, e.target.value)
+                            }
+                            className={`h-9 text-center text-sm bg-slate-900/50 border-slate-800 flex-1 ${
+                              isPending ? "opacity-50" : ""
+                            }`}
+                            placeholder="-"
+                          />
+                          {value && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-9 w-9 p-0 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500/20 hover:text-red-400"
+                              onClick={() => handleClearValue(entry.id, measure.id)}
+                              title="Limpar valor"
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
                       </td>
                     )
                   })}
@@ -226,6 +283,61 @@ export function MeasuresGrid({
           </tbody>
         </table>
       </div>
+
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Editar Medida</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="editName">Nome</Label>
+              <Input
+                id="editName"
+                value={editMeasureName}
+                onChange={(e) => setEditMeasureName(e.target.value)}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="editUnit">Unidade</Label>
+              <Input
+                id="editUnit"
+                value={editMeasureUnit}
+                onChange={(e) => setEditMeasureUnit(e.target.value)}
+                className="mt-1"
+                placeholder="Ex: kg, cm"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={handleSaveEdit}>Salvar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirmar Exclusão</DialogTitle>
+          </DialogHeader>
+          <p className="text-minimal-muted">
+            Tem certeza que deseja excluir a medida "{measureToDelete?.name}"? 
+            Esta ação não pode ser desfeita e todos os valores associados serão perdidos.
+          </p>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
+              Cancelar
+            </Button>
+            <Button variant="destructive" onClick={confirmDelete}>
+              Excluir
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
