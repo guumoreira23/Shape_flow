@@ -43,17 +43,18 @@ export async function getSession() {
   try {
     if (result.session && result.session.fresh) {
       const cookieStore = await cookies()
-      cookieStore.set(lucia.sessionCookieName, result.session.id, {
+      const sessionCookie = lucia.createSessionCookie(result.session.id)
+      cookieStore.set(sessionCookie.name, sessionCookie.value, {
         path: ".",
-        ...lucia.sessionCookie.attributes,
+        ...sessionCookie.attributes,
       })
     }
     if (!result.session) {
       const cookieStore = await cookies()
-      cookieStore.set(lucia.sessionCookieName, "", {
+      const sessionCookie = lucia.createBlankSessionCookie()
+      cookieStore.set(sessionCookie.name, sessionCookie.value, {
         path: ".",
-        ...lucia.sessionCookie.attributes,
-        maxAge: 0,
+        ...sessionCookie.attributes,
       })
     }
   } catch {
