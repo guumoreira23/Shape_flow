@@ -38,15 +38,22 @@ export async function POST(request: NextRequest) {
     const session = await lucia.createSession(user.id, {})
     const sessionCookie = lucia.createSessionCookie(session.id)
 
-    return NextResponse.json(
+    const response = NextResponse.json(
       { success: true, sessionId: session.id },
-      {
-        status: 200,
-        headers: {
-          "Set-Cookie": sessionCookie.serialize(),
-        },
-      }
+      { status: 200 }
     )
+
+    // Definir o cookie usando ambos os métodos para máxima compatibilidade
+    response.headers.set("Set-Cookie", sessionCookie.serialize())
+    response.cookies.set(sessionCookie.name, sessionCookie.value, {
+      ...sessionCookie.attributes,
+      path: "/",
+      httpOnly: true,
+      secure: sessionCookie.attributes.secure ?? process.env.NODE_ENV === "production",
+      sameSite: sessionCookie.attributes.sameSite ?? "lax",
+    })
+
+    return response
   } catch (error) {
     if (error instanceof ZodError) {
       const firstError = error.errors[0]
