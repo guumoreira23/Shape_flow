@@ -211,6 +211,30 @@ export function TrackerClient() {
                   Adicionar Data
                 </Button>
               </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Selecionar Data</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <Calendar
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={(date) => {
+                      if (date) setSelectedDate(date)
+                    }}
+                    className="rounded-md border"
+                  />
+                  <div className="text-sm text-minimal-muted">
+                    Data selecionada: {format(selectedDate, "dd/MM/yyyy")}
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setIsDateDialogOpen(false)}>
+                    Cancelar
+                  </Button>
+                  <Button onClick={handleAddDate}>Confirmar</Button>
+                </DialogFooter>
+              </DialogContent>
             </Dialog>
             <Button
               variant="outline"
@@ -223,31 +247,6 @@ export function TrackerClient() {
               Exportar CSV
             </Button>
           </div>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Selecionar Data</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4">
-                <Calendar
-                  mode="single"
-                  selected={selectedDate}
-                  onSelect={(date) => {
-                    if (date) setSelectedDate(date)
-                  }}
-                  className="rounded-md border"
-                />
-                <div className="text-sm text-minimal-muted">
-                  Data selecionada: {format(selectedDate, "dd/MM/yyyy")}
-                </div>
-              </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setIsDateDialogOpen(false)}>
-                  Cancelar
-                </Button>
-                <Button onClick={handleAddDate}>Confirmar</Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
         </div>
 
         <div className="card-minimal p-6">
