@@ -42,16 +42,15 @@ export async function POST(request: NextRequest) {
       { status: 200 }
     )
 
-    // Configurar o cookie corretamente
+    // Configurar o cookie corretamente usando os atributos do Lucia
+    // O Lucia já configura httpOnly, secure, sameSite corretamente
     response.cookies.set(
       sessionCookie.name,
       sessionCookie.value,
       {
         ...sessionCookie.attributes,
         path: "/",
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
+        // Não sobrescrever atributos que o Lucia já configurou
       }
     )
 
