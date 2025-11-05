@@ -14,14 +14,15 @@ export async function GET(request: NextRequest) {
       orderBy: (measurementTypes, { asc }) => [asc(measurementTypes.createdAt)],
     })
 
+    // Buscar todas as entradas (sem limite para histórico completo)
     const entries = await db.query.measurementEntries.findMany({
       where: (measurementEntries, { eq }) =>
         eq(measurementEntries.userId, user.id),
       orderBy: (measurementEntries, { desc }) => [desc(measurementEntries.date)],
-      limit: 60,
     })
 
-    const values = await db.query.measurementValues.findMany({
+    // Buscar todos os valores (não apenas das últimas 60 entradas)
+    const allValues = await db.query.measurementValues.findMany({
       where: (measurementValues, { inArray }) =>
         inArray(
           measurementValues.entryId,
