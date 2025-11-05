@@ -6,7 +6,7 @@ import { formatNumber } from "@/lib/utils/number"
 
 interface DataPoint {
   date: string
-  [key: string]: string | number
+  [key: string]: string | number | null
 }
 
 interface MultiLineChartProps {
