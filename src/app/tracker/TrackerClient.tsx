@@ -159,7 +159,11 @@ export function TrackerClient() {
   }
 
   const handleLogout = async () => {
-    await fetch("/api/auth/logout", { method: "POST" })
+    try {
+      await fetch("/api/auth/logout", { method: "POST" })
+    } catch (error) {
+      // Ignorar erro, redirecionar mesmo assim
+    }
     router.push("/login")
     router.refresh()
   }
