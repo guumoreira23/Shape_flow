@@ -15,6 +15,7 @@ export const lucia = new Lucia(adapter, {
   getUserAttributes: (attributes) => {
     return {
       email: attributes.email,
+      role: attributes.role,
     }
   },
 })
@@ -24,6 +25,7 @@ declare module "lucia" {
     Lucia: typeof lucia
     DatabaseUserAttributes: {
       email: string
+      role: string
     }
   }
 }

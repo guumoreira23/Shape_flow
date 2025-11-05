@@ -99,6 +99,31 @@ npm start
 - `npm run lint` - Executa o linter
 - `npm run db:push` - Aplica as migrações do banco de dados
 - `npm run db:studio` - Abre o Drizzle Studio para visualizar o banco
+- `npm run create-admin` - Cria um usuário administrador (opcional)
+
+## 👤 Criando um Usuário Administrador (Opcional)
+
+Para criar um usuário administrador via script:
+
+```bash
+# Com email e senha padrão
+npm run create-admin
+
+# Ou com email e senha customizados
+ADMIN_EMAIL=seu-email@exemplo.com ADMIN_PASSWORD=sua-senha npm run create-admin
+```
+
+**Nota**: O sistema atual não diferencia usuários administradores de usuários normais. Todos os usuários têm acesso apenas aos seus próprios dados. O script acima apenas cria um usuário inicial para facilitar o primeiro acesso.
+
+## 🔐 Primeiro Acesso
+
+Como não há sistema de administrador, você pode:
+
+1. **Opção 1**: Acesse `/register` e crie sua conta normalmente
+2. **Opção 2**: Use o script para criar um usuário inicial:
+   ```bash
+   npm run create-admin
+   ```
 
 ## 🤖 Configuração do Chat Coach (OpenAI)
 
@@ -168,4 +193,3 @@ Este projeto é privado e de uso interno.
 ## 🤝 Suporte
 
 Para questões ou problemas, abra uma issue no repositório.
-

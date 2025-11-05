@@ -29,6 +29,7 @@ export async function POST(request: NextRequest) {
       id: userId,
       email: validatedData.email,
       hashedPassword,
+      role: "user", // Todos os registros são 'user' por padrão
     })
 
     const session = await lucia.createSession(userId, {})

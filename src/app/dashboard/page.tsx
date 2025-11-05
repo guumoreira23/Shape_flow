@@ -1,16 +1,18 @@
 import { requireAuth } from "@/lib/auth/middleware"
+import { isAdmin } from "@/lib/auth/permissions"
 import { db } from "@/db"
 import { measurementTypes, measurementEntries, measurementValues, goals } from "@/db/schema"
 import { eq, desc } from "drizzle-orm"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { LogOut, Plus, TrendingUp } from "lucide-react"
+import { LogOut, Plus, TrendingUp, Shield } from "lucide-react"
 import { formatNumber } from "@/lib/utils/number"
 import { formatDateDisplay } from "@/lib/utils/date"
 import { WeightChart } from "@/components/charts/WeightChart"
 
 export default async function DashboardPage() {
   const { user } = await requireAuth()
+  const userIsAdmin = await isAdmin()
 
   const measures = await db.query.measurementTypes.findMany({
     where: (types, { eq }) => eq(types.userId, user.id),
@@ -129,6 +131,14 @@ export default async function DashboardPage() {
               Gerenciar Medidas
             </Button>
           </Link>
+          {userIsAdmin && (
+            <Link href="/admin">
+              <Button variant="outline">
+                <Shield className="h-4 w-4 mr-2" />
+                Painel Admin
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
     </div>
