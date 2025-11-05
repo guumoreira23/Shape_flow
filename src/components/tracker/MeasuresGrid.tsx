@@ -216,6 +216,11 @@ export function MeasuresGrid({
     }
   }
 
+  const handleDeleteMeasure = (measure: Measure) => {
+    setMeasureToDelete(measure)
+    setIsDeleteAlertOpen(true)
+  }
+
   return (
     <div className="w-full overflow-x-auto rounded-lg border border-slate-800/50">
       <div className="inline-block min-w-full">
