@@ -12,19 +12,23 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 
 async function logout() {
   "use server"
-  const { lucia } = await import("@/lib/auth/lucia")
-  const { cookies } = await import("next/headers")
-  
-  const cookieStore = await cookies()
-  const sessionId = cookieStore.get(lucia.sessionCookieName)?.value ?? null
+  try {
+    const { lucia } = await import("@/lib/auth/lucia")
+    const { cookies } = await import("next/headers")
+    
+    const cookieStore = await cookies()
+    const sessionId = cookieStore.get(lucia.sessionCookieName)?.value ?? null
 
-  if (sessionId) {
-    await lucia.invalidateSession(sessionId)
+    if (sessionId) {
+      await lucia.invalidateSession(sessionId)
+    }
+
+    const sessionCookie = lucia.createBlankSessionCookie()
+    cookieStore.set(sessionCookie.name, sessionCookie.value, sessionCookie.attributes)
+  } catch (error) {
+    console.error("Logout error:", error)
   }
-
-  const sessionCookie = lucia.createBlankSessionCookie()
-  cookieStore.set(sessionCookie.name, sessionCookie.value, sessionCookie.attributes)
-
+  
   redirect("/login")
 }
 
