@@ -1,8 +1,13 @@
 import { z } from "zod"
 
 export const loginSchema = z.object({
-  email: z.string().email("Email inválido"),
-  password: z.string().min(6, "Senha deve ter no mínimo 6 caracteres"),
+  email: z
+    .string()
+    .min(1, "Email é obrigatório")
+    .email("Email inválido")
+    .toLowerCase()
+    .trim(),
+  password: z.string().min(1, "Senha é obrigatória"),
 })
 
 export const registerSchema = z
@@ -48,6 +53,19 @@ export const createGoalSchema = z.object({
     .int("Meta deve ser um número inteiro")
     .positive("Meta deve ser positiva")
     .max(999999, "Meta muito grande"),
+})
+
+export const createMeasureTypeSchema = z.object({
+  name: z
+    .string()
+    .min(1, "Nome é obrigatório")
+    .max(50, "Nome muito longo")
+    .trim(),
+  unit: z
+    .string()
+    .min(1, "Unidade é obrigatória")
+    .max(10, "Unidade muito longa")
+    .trim(),
 })
 
 export const chatMessageSchema = z.object({

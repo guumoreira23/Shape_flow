@@ -2,12 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/db"
 import { measurementTypes } from "@/db/schema"
 import { requireAuth } from "@/lib/auth/lucia"
-import { z } from "zod"
-
-const createMeasureTypeSchema = z.object({
-  name: z.string().min(1, "Nome é obrigatório"),
-  unit: z.string().min(1, "Unidade é obrigatória"),
-})
+import { createMeasureTypeSchema } from "@/lib/utils/zod"
 
 export async function GET(request: NextRequest) {
   try {
