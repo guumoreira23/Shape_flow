@@ -5,14 +5,24 @@ export const loginSchema = z.object({
   password: z.string().min(6, "Senha deve ter no mínimo 6 caracteres"),
 })
 
-export const registerSchema = z.object({
-  email: z.string().email("Email inválido"),
-  password: z.string().min(6, "Senha deve ter no mínimo 6 caracteres"),
-  confirmPassword: z.string().min(6, "Senha deve ter no mínimo 6 caracteres"),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "As senhas não coincidem",
-  path: ["confirmPassword"],
-})
+export const registerSchema = z
+  .object({
+    email: z
+      .string()
+      .min(1, "Email é obrigatório")
+      .email("Email inválido")
+      .toLowerCase()
+      .trim(),
+    password: z
+      .string()
+      .min(6, "Senha deve ter no mínimo 6 caracteres")
+      .max(100, "Senha muito longa"),
+    confirmPassword: z.string().min(1, "Confirmação de senha é obrigatória"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "As senhas não coincidem",
+    path: ["confirmPassword"],
+  })
 
 export const createDateSchema = z.object({
   date: z
@@ -22,14 +32,22 @@ export const createDateSchema = z.object({
 })
 
 export const createValueSchema = z.object({
-  entryId: z.number().int().positive(),
-  measureTypeId: z.number().int().positive(),
-  value: z.number().int().positive(),
+  entryId: z.number().int().positive("ID da entrada inválido"),
+  measureTypeId: z.number().int().positive("ID da medida inválido"),
+  value: z
+    .number()
+    .int("Valor deve ser um número inteiro")
+    .positive("Valor deve ser positivo")
+    .max(999999, "Valor muito grande"),
 })
 
 export const createGoalSchema = z.object({
-  measureTypeId: z.number().int().positive(),
-  targetValue: z.number().int().positive(),
+  measureTypeId: z.number().int().positive("ID da medida inválido"),
+  targetValue: z
+    .number()
+    .int("Meta deve ser um número inteiro")
+    .positive("Meta deve ser positiva")
+    .max(999999, "Meta muito grande"),
 })
 
 export const chatMessageSchema = z.object({

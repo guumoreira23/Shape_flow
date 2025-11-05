@@ -22,6 +22,11 @@ export async function GET(request: NextRequest) {
       orderBy: (measurementEntries, { desc }) => [desc(measurementEntries.date)],
     })
 
+    // Buscar metas do usuário
+    const userGoals = await db.query.goals.findMany({
+      where: (goals, { eq }) => eq(goals.userId, user.id),
+    })
+
     // Se não houver entradas, retornar vazio
     if (entries.length === 0) {
       return NextResponse.json({
@@ -40,10 +45,6 @@ export async function GET(request: NextRequest) {
           measurementValues.entryId,
           entries.map((e) => e.id)
         ),
-    })
-
-    const userGoals = await db.query.goals.findMany({
-      where: (goals, { eq }) => eq(goals.userId, user.id),
     })
 
     const today = formatDate(getTodayDate())
