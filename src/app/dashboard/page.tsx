@@ -109,7 +109,7 @@ export default async function DashboardPage() {
                 ? `${formatNumber(getLatestValue(weightMeasure.id)!)} ${weightMeasure.unit}`
                 : "N/A"}
             </p>
-            {weightGoal && (
+            {weightGoal && weightMeasure && (
               <p className="text-xs text-slate-500 mt-1">
                 Meta: {weightGoal.targetValue} {weightMeasure.unit}
               </p>
