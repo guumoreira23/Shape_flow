@@ -53,22 +53,18 @@ export async function getSession() {
   }
   
   try {
+    // Apenas atualizar cookie se a sessão for fresh (renovada)
+    // Não limpar cookie se a sessão não existir - isso pode ser temporário
     if (result.session && result.session.fresh) {
       const cookieStore = await cookies()
       const sessionCookie = lucia.createSessionCookie(result.session.id)
       cookieStore.set(sessionCookie.name, sessionCookie.value, {
         ...sessionCookie.attributes,
-        path: "/", // Consistente com a configuração do Lucia
+        path: "/",
       })
     }
-    if (!result.session) {
-      const cookieStore = await cookies()
-      const sessionCookie = lucia.createBlankSessionCookie()
-      cookieStore.set(sessionCookie.name, sessionCookie.value, {
-        ...sessionCookie.attributes,
-        path: "/", // Consistente com a configuração do Lucia
-      })
-    }
+    // Não definir cookie vazio aqui - isso limpa cookies válidos
+    // O cookie vazio só deve ser definido explicitamente no logout
   } catch (error) {
     // Next.js throws error when attempting to set cookies during rendering
     // Isso é normal em Server Components, então apenas logamos em desenvolvimento

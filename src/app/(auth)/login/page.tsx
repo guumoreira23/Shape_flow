@@ -43,6 +43,7 @@ export default function LoginPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(validatedData),
+        credentials: "include", // Importante: incluir cookies na requisição
       })
 
       const data = await response.json()
@@ -64,8 +65,8 @@ export default function LoginPage() {
         title: "Login realizado com sucesso!",
       })
 
-      // Aguardar um pouco para garantir que o cookie seja processado
-      await new Promise((resolve) => setTimeout(resolve, 100))
+      // Aguardar um pouco para garantir que o cookie seja processado pelo navegador
+      await new Promise((resolve) => setTimeout(resolve, 200))
       
       // Usar window.location para garantir que a navegação aconteça com os cookies
       window.location.href = "/dashboard"
