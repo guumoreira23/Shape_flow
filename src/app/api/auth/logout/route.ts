@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { lucia } from "@/lib/auth/lucia"
 import { cookies } from "next/headers"
-import { redirect } from "next/navigation"
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,13 +12,28 @@ export async function POST(request: NextRequest) {
     }
 
     const sessionCookie = lucia.createBlankSessionCookie()
-    cookieStore.set(sessionCookie.name, sessionCookie.value, sessionCookie.attributes)
 
-    // Redirecionar para login após logout
-    redirect("/login")
+    return NextResponse.json(
+      { success: true },
+      {
+        status: 200,
+        headers: {
+          "Set-Cookie": sessionCookie.serialize(),
+        },
+      }
+    )
   } catch (error) {
     console.error("Logout error:", error)
-    redirect("/login")
+    const sessionCookie = lucia.createBlankSessionCookie()
+    return NextResponse.json(
+      { success: true },
+      {
+        status: 200,
+        headers: {
+          "Set-Cookie": sessionCookie.serialize(),
+        },
+      }
+    )
   }
 }
 
