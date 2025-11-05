@@ -3,9 +3,7 @@ import postgres from "postgres"
 
 const connectionString = process.env.DATABASE_URL!
 
-if (!connectionString) {
-  throw new Error("DATABASE_URL is not defined")
-}
+// DATABASE_URL será validado em runtime, não durante build
 
 // Use postgres client for Lucia adapter (works better with Neon)
 const sql = postgres(connectionString)

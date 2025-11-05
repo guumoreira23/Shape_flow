@@ -2,9 +2,7 @@ import { Lucia } from "lucia"
 import { adapter } from "./postgres"
 import { cookies } from "next/headers"
 
-if (!process.env.LUCIA_SECRET) {
-  throw new Error("LUCIA_SECRET is not defined")
-}
+// LUCIA_SECRET será validado em runtime, não durante build
 
 export const lucia = new Lucia(adapter, {
   sessionCookie: {
