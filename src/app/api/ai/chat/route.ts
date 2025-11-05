@@ -8,9 +8,11 @@ import OpenAI from "openai"
 import { eq, and, gte, desc } from "drizzle-orm"
 import { getTodayDate } from "@/lib/utils/date"
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-})
+function getOpenAIClient() {
+  return new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY || "",
+  })
+}
 
 async function getUserMetricsSummary(userId: string) {
   const thirtyDaysAgo = new Date(getTodayDate())
@@ -142,6 +144,8 @@ export async function POST(request: NextRequest) {
     const stream = new ReadableStream({
       async start(controller) {
         try {
+          const openai = getOpenAIClient()
+          
           if (process.env.ASSISTANT_ID_THAS_CARLA) {
             const assistantId = process.env.ASSISTANT_ID_THAS_CARLA
             const thread = await openai.beta.threads.create()
@@ -220,6 +224,7 @@ export async function POST(request: NextRequest) {
               }
             }
           } else {
+            const openai = getOpenAIClient()
             const completion = await openai.chat.completions.create({
               model: "gpt-4-turbo-preview",
               messages: [
