@@ -5,10 +5,11 @@ import { measurementTypes, measurementEntries, measurementValues, goals } from "
 import { eq, desc } from "drizzle-orm"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { LogOut, Plus, TrendingUp, Shield } from "lucide-react"
+import { Plus, TrendingUp, Shield, ArrowRight } from "lucide-react"
 import { formatNumber } from "@/lib/utils/number"
 import { formatDateDisplay } from "@/lib/utils/date"
 import { WeightChart } from "@/components/charts/WeightChart"
+import { MainLayout } from "@/components/layout/MainLayout"
 
 export default async function DashboardPage() {
   const { user } = await requireAuth()
@@ -72,46 +73,78 @@ export default async function DashboardPage() {
     : null
 
   return (
-    <div className="min-h-screen bg-slate-950 p-6">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-white">Dashboard</h1>
-          <form action="/api/auth/logout" method="POST">
-            <Button type="submit" variant="outline" size="sm">
-              <LogOut className="h-4 w-4 mr-2" />
-              Sair
-            </Button>
-          </form>
+    <MainLayout>
+      <div className="space-y-8">
+        <div>
+          <h1 className="text-3xl font-semibold text-white mb-2">Dashboard</h1>
+          <p className="text-slate-400">Bem-vindo de volta, {user.email}</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-slate-900 border border-slate-700 rounded-lg p-6">
-            <h3 className="text-sm text-slate-400 mb-2">Último Peso</h3>
-            <p className="text-2xl font-bold text-white">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="card-minimal p-6">
+            <h3 className="text-sm font-medium text-minimal-muted mb-3">Último Peso</h3>
+            <p className="text-3xl font-semibold text-white mb-1">
               {weightMeasure && getLatestValue(weightMeasure.id)
                 ? `${formatNumber(getLatestValue(weightMeasure.id)!)} ${weightMeasure.unit}`
                 : "N/A"}
             </p>
             {weightGoal && weightMeasure && (
-              <p className="text-xs text-slate-500 mt-1">
-                Meta: {weightGoal.targetValue} {weightMeasure.unit}
+              <p className="text-sm text-minimal-muted mt-2">
+                Meta: <span className="text-blue-400 font-medium">{weightGoal.targetValue} {weightMeasure.unit}</span>
               </p>
             )}
           </div>
 
-          <div className="bg-slate-900 border border-slate-700 rounded-lg p-6">
-            <h3 className="text-sm text-slate-400 mb-2">Última Cintura</h3>
-            <p className="text-2xl font-bold text-white">
+          <div className="card-minimal p-6">
+            <h3 className="text-sm font-medium text-minimal-muted mb-3">Última Cintura</h3>
+            <p className="text-3xl font-semibold text-white mb-1">
               {waistMeasure && getLatestValue(waistMeasure.id)
                 ? `${formatNumber(getLatestValue(waistMeasure.id)!)} ${waistMeasure.unit}`
                 : "N/A"}
             </p>
           </div>
 
-          <div className="bg-slate-900 border border-slate-700 rounded-lg p-6">
-            <h3 className="text-sm text-slate-400 mb-2">Total de Lançamentos</h3>
-            <p className="text-2xl font-bold text-white">{entries.length}</p>
+          <div className="card-minimal p-6">
+            <h3 className="text-sm font-medium text-minimal-muted mb-3">Total de Lançamentos</h3>
+            <p className="text-3xl font-semibold text-white">{entries.length}</p>
+            <p className="text-sm text-minimal-muted mt-2">Registros totais</p>
           </div>
+        </div>
+
+        {weightData.length > 0 && (
+          <div className="card-minimal p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-xl font-semibold text-white mb-1 flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5 text-blue-400" />
+                  Evolução do Peso
+                </h2>
+                <p className="text-sm text-minimal-muted">Últimos 7 dias</p>
+              </div>
+            </div>
+            <WeightChart data={weightData} goal={weightGoal?.targetValue} />
+          </div>
+        )}
+
+        <div className="flex gap-4">
+          <Link href="/tracker">
+            <Button className="gap-2">
+              <Plus className="h-4 w-4" />
+              Gerenciar Medidas
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          </Link>
+          {userIsAdmin && (
+            <Link href="/admin">
+              <Button variant="outline" className="gap-2">
+                <Shield className="h-4 w-4" />
+                Painel Admin
+              </Button>
+            </Link>
+          )}
+        </div>
+      </div>
+    </MainLayout>
         </div>
 
         {weightData.length > 0 && (

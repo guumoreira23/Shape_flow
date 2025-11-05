@@ -22,6 +22,7 @@ import { Users, Shield, Trash2, UserPlus } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { useToast } from "@/components/ui/use-toast"
 import { formatDateDisplay } from "@/lib/utils/date"
+import { MainLayout } from "@/components/layout/MainLayout"
 
 interface User {
   id: string
@@ -187,9 +188,11 @@ export function AdminPanel() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-        <p className="text-slate-400">Carregando...</p>
-      </div>
+      <MainLayout>
+        <div className="flex items-center justify-center h-64">
+          <p className="text-minimal-muted">Carregando...</p>
+        </div>
+      </MainLayout>
     )
   }
 
@@ -197,46 +200,62 @@ export function AdminPanel() {
   const userCount = users.filter((u) => u.role === "user").length
 
   return (
-    <div className="min-h-screen bg-slate-950 p-6">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex items-center gap-3 mb-8">
-          <Shield className="h-8 w-8 text-blue-400" />
-          <h1 className="text-3xl font-bold text-white">Painel Administrativo</h1>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-slate-900 border border-slate-700 rounded-lg p-6">
-            <div className="flex items-center gap-2 mb-2">
-              <Users className="h-5 w-5 text-slate-400" />
-              <h3 className="text-sm text-slate-400">Total de Usuários</h3>
-            </div>
-            <p className="text-2xl font-bold text-white">{users.length}</p>
-          </div>
-
-          <div className="bg-slate-900 border border-slate-700 rounded-lg p-6">
-            <div className="flex items-center gap-2 mb-2">
+    <MainLayout>
+      <div className="space-y-8">
+        <div>
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-10 h-10 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
               <Shield className="h-5 w-5 text-blue-400" />
-              <h3 className="text-sm text-slate-400">Administradores</h3>
             </div>
-            <p className="text-2xl font-bold text-blue-400">{adminCount}</p>
-          </div>
-
-          <div className="bg-slate-900 border border-slate-700 rounded-lg p-6">
-            <div className="flex items-center gap-2 mb-2">
-              <Users className="h-5 w-5 text-green-400" />
-              <h3 className="text-sm text-slate-400">Usuários</h3>
+            <div>
+              <h1 className="text-3xl font-semibold text-white">Painel Administrativo</h1>
+              <p className="text-minimal-muted">Gerencie usuários e permissões</p>
             </div>
-            <p className="text-2xl font-bold text-green-400">{userCount}</p>
           </div>
         </div>
 
-        <div className="bg-slate-900 border border-slate-700 rounded-lg">
-          <div className="p-6 border-b border-slate-700 flex justify-between items-center">
-            <h2 className="text-xl font-semibold text-white">Gerenciar Usuários</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="card-minimal p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center">
+                <Users className="h-5 w-5 text-slate-400" />
+              </div>
+              <h3 className="text-sm font-medium text-minimal-muted">Total de Usuários</h3>
+            </div>
+            <p className="text-3xl font-semibold text-white mb-1">{users.length}</p>
+          </div>
+
+          <div className="card-minimal p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
+                <Shield className="h-5 w-5 text-blue-400" />
+              </div>
+              <h3 className="text-sm font-medium text-minimal-muted">Administradores</h3>
+            </div>
+            <p className="text-3xl font-semibold text-blue-400 mb-1">{adminCount}</p>
+          </div>
+
+          <div className="card-minimal p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-lg bg-green-500/10 border border-green-500/20 flex items-center justify-center">
+                <Users className="h-5 w-5 text-green-400" />
+              </div>
+              <h3 className="text-sm font-medium text-minimal-muted">Usuários</h3>
+            </div>
+            <p className="text-3xl font-semibold text-green-400 mb-1">{userCount}</p>
+          </div>
+        </div>
+
+        <div className="card-minimal">
+          <div className="p-6 border-b border-slate-800/50 flex justify-between items-center">
+            <div>
+              <h2 className="text-xl font-semibold text-white mb-1">Gerenciar Usuários</h2>
+              <p className="text-sm text-minimal-muted">Visualize e gerencie todos os usuários do sistema</p>
+            </div>
             <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
               <DialogTrigger asChild>
-                <Button>
-                  <UserPlus className="h-4 w-4 mr-2" />
+                <Button className="gap-2">
+                  <UserPlus className="h-4 w-4" />
                   Criar Usuário
                 </Button>
               </DialogTrigger>
@@ -295,29 +314,29 @@ export function AdminPanel() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-slate-700">
-                  <th className="text-left p-4 text-slate-400">Email</th>
-                  <th className="text-left p-4 text-slate-400">Role</th>
-                  <th className="text-left p-4 text-slate-400">Data de Criação</th>
-                  <th className="text-right p-4 text-slate-400">Ações</th>
+                <tr className="border-b border-slate-800/50">
+                  <th className="text-left p-4 text-sm font-medium text-minimal-muted">Email</th>
+                  <th className="text-left p-4 text-sm font-medium text-minimal-muted">Role</th>
+                  <th className="text-left p-4 text-sm font-medium text-minimal-muted">Data de Criação</th>
+                  <th className="text-right p-4 text-sm font-medium text-minimal-muted">Ações</th>
                 </tr>
               </thead>
               <tbody>
                 {users.map((user) => (
-                  <tr key={user.id} className="border-b border-slate-700 hover:bg-slate-800">
-                    <td className="p-4 text-white">{user.email}</td>
+                  <tr key={user.id} className="border-b border-slate-800/50 hover:bg-slate-800/30 transition-colors">
+                    <td className="p-4 text-white font-medium">{user.email}</td>
                     <td className="p-4">
                       <span
-                        className={`px-2 py-1 rounded text-xs font-medium ${
+                        className={`px-3 py-1.5 rounded-lg text-xs font-medium ${
                           user.role === "admin"
-                            ? "bg-blue-500/20 text-blue-400"
-                            : "bg-green-500/20 text-green-400"
+                            ? "bg-blue-500/10 text-blue-400 border border-blue-500/20"
+                            : "bg-green-500/10 text-green-400 border border-green-500/20"
                         }`}
                       >
                         {user.role === "admin" ? "Admin" : "User"}
                       </span>
                     </td>
-                    <td className="p-4 text-slate-400">
+                    <td className="p-4 text-minimal-muted">
                       {formatDateDisplay(new Date(user.createdAt))}
                     </td>
                     <td className="p-4">
@@ -326,6 +345,7 @@ export function AdminPanel() {
                           variant="outline"
                           size="sm"
                           onClick={() => openEditDialog(user)}
+                          className="gap-2"
                         >
                           Editar Role
                         </Button>
@@ -380,7 +400,7 @@ export function AdminPanel() {
           </DialogContent>
         </Dialog>
       </div>
-    </div>
+    </MainLayout>
   )
 }
 

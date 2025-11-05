@@ -15,6 +15,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 import { ArrowLeft, Target } from "lucide-react"
+import { MainLayout } from "@/components/layout/MainLayout"
 import { useToast } from "@/components/ui/use-toast"
 
 interface Measure {
@@ -86,26 +87,27 @@ export function MeasureChartClient({
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 p-6">
-      <div className="max-w-6xl mx-auto">
-        <div className="flex justify-between items-center mb-6">
+    <MainLayout>
+      <div className="space-y-6">
+        <div className="flex justify-between items-start">
           <div className="flex items-center gap-4">
             <Button
               variant="ghost"
               onClick={() => router.push("/tracker")}
+              className="gap-2"
             >
-              <ArrowLeft className="h-4 w-4 mr-2" />
+              <ArrowLeft className="h-4 w-4" />
               Voltar
             </Button>
             <div>
-              <h1 className="text-3xl font-bold text-white">{measure.name}</h1>
-              <p className="text-slate-400">{measure.unit}</p>
+              <h1 className="text-3xl font-semibold text-white mb-1">{measure.name}</h1>
+              <p className="text-minimal-muted">{measure.unit}</p>
             </div>
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button variant="outline">
-                <Target className="h-4 w-4 mr-2" />
+              <Button variant="outline" className="gap-2">
+                <Target className="h-4 w-4" />
                 {goal ? "Editar Meta" : "Definir Meta"}
               </Button>
             </DialogTrigger>
@@ -135,7 +137,7 @@ export function MeasureChartClient({
           </Dialog>
         </div>
 
-        <div className="bg-slate-900 border border-slate-700 rounded-lg">
+        <div className="card-minimal p-6">
           <MeasureChart
             data={data}
             measureName={measure.name}
@@ -145,7 +147,7 @@ export function MeasureChartClient({
           />
         </div>
       </div>
-    </div>
+    </MainLayout>
   )
 }
 

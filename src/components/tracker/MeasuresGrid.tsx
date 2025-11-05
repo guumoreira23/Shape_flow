@@ -140,19 +140,19 @@ export function MeasuresGrid({
   }
 
   return (
-    <div className="w-full overflow-x-auto">
+    <div className="w-full overflow-x-auto rounded-lg border border-slate-800/50">
       <div className="inline-block min-w-full">
         <table className="border-collapse">
           <thead>
-            <tr>
-              <th className="sticky left-0 z-10 bg-slate-900 border border-slate-700 px-4 py-2 text-left">
+            <tr className="bg-slate-900/50">
+              <th className="sticky left-0 z-10 bg-slate-900/95 border-r border-slate-800/50 px-4 py-3 text-left backdrop-blur-sm">
                 <div className="flex items-center gap-2">
-                  <span>Medida</span>
+                  <span className="font-semibold text-white">Medida</span>
                   <Button
                     size="sm"
                     variant="ghost"
                     onClick={onAddMeasure}
-                    className="h-6 w-6 p-0"
+                    className="h-6 w-6 p-0 hover:bg-slate-800"
                   >
                     <Plus className="h-4 w-4" />
                   </Button>
@@ -161,7 +161,7 @@ export function MeasuresGrid({
               {sortedEntries.map((entry) => (
                 <th
                   key={entry.id}
-                  className="border border-slate-700 px-3 py-2 text-center text-xs bg-slate-900 min-w-[100px]"
+                  className="border-b border-r border-slate-800/50 px-3 py-3 text-center text-xs font-medium text-minimal-muted min-w-[100px]"
                 >
                   {formatDateDisplay(new Date(entry.date + "T00:00:00"))}
                 </th>
@@ -172,20 +172,22 @@ export function MeasuresGrid({
             {measures.map((measure) => {
               const goal = getGoal(measure.id)
               return (
-                <tr key={measure.id}>
-                  <td className="sticky left-0 z-10 bg-slate-900 border border-slate-700 px-4 py-2">
-                    <div className="flex flex-col gap-1">
+                <tr key={measure.id} className="border-b border-slate-800/50 hover:bg-slate-900/30 transition-colors">
+                  <td className="sticky left-0 z-10 bg-slate-900/95 border-r border-slate-800/50 px-4 py-3 backdrop-blur-sm">
+                    <div className="flex flex-col gap-1.5">
                       <div className="flex items-center gap-2">
-                        <span className="font-medium">{measure.name}</span>
+                        <span className="font-medium text-white">{measure.name}</span>
                         <Link href={`/tracker/${measure.id}`}>
-                          <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                            <ChartLine className="h-3 w-3" />
+                          <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-slate-800">
+                            <ChartLine className="h-3.5 w-3.5" />
                           </Button>
                         </Link>
                       </div>
-                      <span className="text-xs text-slate-400">
+                      <span className="text-xs text-minimal-muted">
                         {measure.unit}
-                        {goal && ` • Meta: ${goal}`}
+                        {goal && (
+                          <span className="ml-2 text-blue-400 font-medium">Meta: {goal}</span>
+                        )}
                       </span>
                     </div>
                   </td>
@@ -197,7 +199,7 @@ export function MeasuresGrid({
                     return (
                       <td
                         key={entry.id}
-                        className="border border-slate-700 px-2 py-1 bg-slate-950"
+                        className="border-r border-slate-800/50 px-2 py-2 bg-slate-950/50"
                       >
                         <Input
                           type="number"
@@ -205,7 +207,7 @@ export function MeasuresGrid({
                           onChange={(e) =>
                             handleCellChange(entry.id, measure.id, e.target.value)
                           }
-                          className={`h-8 text-center text-sm ${
+                          className={`h-9 text-center text-sm bg-slate-900/50 border-slate-800 ${
                             isPending ? "opacity-50" : ""
                           }`}
                           placeholder="-"

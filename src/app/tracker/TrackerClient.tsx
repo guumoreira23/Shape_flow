@@ -14,7 +14,8 @@ import {
   DialogTrigger,
   DialogFooter,
 } from "@/components/ui/dialog"
-import { Plus, LogOut } from "lucide-react"
+import { Plus } from "lucide-react"
+import { MainLayout } from "@/components/layout/MainLayout"
 import { useToast } from "@/components/ui/use-toast"
 import { getTodayDate, formatDate } from "@/lib/utils/date"
 
@@ -158,42 +159,31 @@ export function TrackerClient() {
     }
   }
 
-  const handleLogout = async () => {
-    try {
-      await fetch("/api/auth/logout", { method: "POST" })
-    } catch (error) {
-      // Ignorar erro, redirecionar mesmo assim
-    }
-    router.push("/login")
-    router.refresh()
-  }
-
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-        <p className="text-slate-400">Carregando...</p>
-      </div>
+      <MainLayout>
+        <div className="flex items-center justify-center h-64">
+          <p className="text-minimal-muted">Carregando...</p>
+        </div>
+      </MainLayout>
     )
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 p-6">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-white">Tracker de Medidas</h1>
-          <div className="flex gap-2">
-            <Button onClick={handleAddDate} variant="outline">
-              <Plus className="h-4 w-4 mr-2" />
-              Adicionar Data
-            </Button>
-            <Button onClick={handleLogout} variant="outline" size="sm">
-              <LogOut className="h-4 w-4 mr-2" />
-              Sair
-            </Button>
+    <MainLayout>
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-semibold text-white mb-2">Tracker de Medidas</h1>
+            <p className="text-minimal-muted">Gerencie suas medidas corporais</p>
           </div>
+          <Button onClick={handleAddDate} variant="outline" className="gap-2">
+            <Plus className="h-4 w-4" />
+            Adicionar Data
+          </Button>
         </div>
 
-        <div className="bg-slate-900 border border-slate-700 rounded-lg p-6">
+        <div className="card-minimal p-6">
           <MeasuresGrid
             measures={measures}
             entries={entries}
@@ -237,7 +227,7 @@ export function TrackerClient() {
           </DialogContent>
         </Dialog>
       </div>
-    </div>
+    </MainLayout>
   )
 }
 

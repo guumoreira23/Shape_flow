@@ -110,7 +110,7 @@ export function ChatWidget() {
       {!isOpen && (
         <Button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg z-50 bg-blue-600 hover:bg-blue-700"
+          className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg z-50 bg-blue-600 hover:bg-blue-700 hover:scale-105 transition-transform"
           size="icon"
         >
           <MessageCircle className="h-6 w-6" />
@@ -118,8 +118,8 @@ export function ChatWidget() {
       )}
 
       {isOpen && (
-        <div className="fixed bottom-6 right-6 w-96 h-[600px] bg-slate-900 border border-slate-700 rounded-lg shadow-2xl z-50 flex flex-col">
-          <div className="flex items-center justify-between p-4 border-b border-slate-700 bg-slate-800">
+        <div className="fixed bottom-6 right-6 w-96 h-[600px] card-minimal shadow-2xl z-50 flex flex-col">
+          <div className="flex items-center justify-between p-4 border-b border-slate-800/50 bg-slate-900/50 rounded-t-xl">
             <div className="flex items-center gap-2">
               <MessageCircle className="h-5 w-5 text-blue-400" />
               <h3 className="font-semibold text-white">Thais Carla</h3>
@@ -134,9 +134,9 @@ export function ChatWidget() {
             </Button>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-950/30">
             {messages.length === 0 && (
-              <div className="text-center text-slate-400 text-sm py-8">
+              <div className="text-center text-minimal-muted text-sm py-8">
                 Olá! Sou a Thais Carla, sua coach de fitness. Como posso te ajudar hoje?
               </div>
             )}
@@ -148,13 +148,13 @@ export function ChatWidget() {
                 }`}
               >
                 <div
-                  className={`max-w-[80%] rounded-lg px-4 py-2 ${
+                  className={`max-w-[80%] rounded-lg px-4 py-2.5 ${
                     message.role === "user"
-                      ? "bg-blue-600 text-white"
-                      : "bg-slate-800 text-slate-200"
+                      ? "bg-blue-600 text-white shadow-sm"
+                      : "card-minimal text-slate-200"
                   }`}
                 >
-                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                  <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
                 </div>
               </div>
             ))}
@@ -172,7 +172,7 @@ export function ChatWidget() {
             <div ref={messagesEndRef} />
           </div>
 
-          <div className="p-4 border-t border-slate-700 bg-slate-800">
+          <div className="p-4 border-t border-slate-800/50 bg-slate-900/50 rounded-b-xl">
             <div className="flex gap-2">
               <Input
                 value={input}

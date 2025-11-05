@@ -23,7 +23,7 @@
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 224.3 76.3% 48%;
-    --radius: 0.5rem;
+    --radius: 0.75rem;
   }
 }
 
@@ -32,7 +32,22 @@
     @apply border-border;
   }
   body {
-    @apply bg-slate-950 text-foreground;
+    @apply bg-slate-950 text-foreground antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer utilities {
+  .card-minimal {
+    @apply bg-slate-900/50 border border-slate-800/50 rounded-xl shadow-sm backdrop-blur-sm;
+  }
+  
+  .text-minimal {
+    @apply text-slate-200;
+  }
+  
+  .text-minimal-muted {
+    @apply text-slate-400;
   }
 }
 

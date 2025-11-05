@@ -79,7 +79,7 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-950 p-4">
-      <div className="w-full max-w-md space-y-8 bg-slate-900 p-8 rounded-lg border border-slate-700">
+      <div className="w-full max-w-md space-y-8 card-minimal p-8">
         <div>
           <h2 className="text-3xl font-bold text-center text-white">
             ShapeFlow
