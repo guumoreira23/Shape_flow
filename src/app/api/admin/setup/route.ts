@@ -4,6 +4,7 @@ import { users } from "@/db/schema"
 import { hashPassword } from "@/lib/auth/password"
 import { generateId } from "lucia"
 import postgres from "postgres"
+import { eq } from "drizzle-orm"
 
 // Rota temporária para setup inicial
 // TODO: Remover após configuração inicial
@@ -59,7 +60,7 @@ export async function POST(request: NextRequest) {
       await db
         .update(users)
         .set({ role: "admin" })
-        .where((users, { eq }) => eq(users.id, existingUser.id))
+        .where(eq(users.id, existingUser.id))
 
       return NextResponse.json({
         success: true,
