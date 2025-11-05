@@ -61,15 +61,35 @@ export default function LoginPage() {
         localStorage.removeItem(REMEMBERED_EMAIL_KEY)
       }
 
-      toast({
-        title: "Login realizado com sucesso!",
-      })
-
+      // Verificar se o cookie foi definido antes de redirecionar
       // Aguardar um pouco para garantir que o cookie seja processado pelo navegador
-      await new Promise((resolve) => setTimeout(resolve, 200))
+      await new Promise((resolve) => setTimeout(resolve, 300))
       
-      // Usar window.location para garantir que a navegação aconteça com os cookies
-      window.location.href = "/dashboard"
+      // Verificar autenticação antes de redirecionar
+      try {
+        const checkResponse = await fetch("/api/auth/check", {
+          credentials: "include",
+        })
+        const checkData = await checkResponse.json()
+        
+        if (checkData.authenticated) {
+          toast({
+            title: "Login realizado com sucesso!",
+          })
+          // Usar window.location para garantir que a navegação aconteça com os cookies
+          window.location.href = "/dashboard"
+        } else {
+          throw new Error("Falha na autenticação. Tente novamente.")
+        }
+      } catch (checkError) {
+        console.error("Erro ao verificar autenticação:", checkError)
+        toast({
+          title: "Erro ao fazer login",
+          description: "O cookie não foi definido corretamente. Tente novamente.",
+          variant: "destructive",
+        })
+        setIsLoading(false)
+      }
     } catch (error: any) {
       toast({
         title: "Erro ao fazer login",

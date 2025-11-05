@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
     const sessionCookie = lucia.createSessionCookie(session.id)
 
     const response = NextResponse.json(
-      { success: true },
+      { success: true, sessionId: session.id },
       { status: 200 }
     )
 
@@ -53,6 +53,14 @@ export async function POST(request: NextRequest) {
         // Não sobrescrever atributos que o Lucia já configurou
       }
     )
+
+    console.log("Login successful:", {
+      userId: user.id,
+      email: user.email,
+      sessionId: session.id,
+      cookieName: sessionCookie.name,
+      cookieSet: !!response.cookies.get(sessionCookie.name),
+    })
 
     return response
   } catch (error) {
