@@ -9,5 +9,5 @@ if (!connectionString) {
 }
 
 const sql = neon(connectionString)
-export const db = drizzle({ client: sql, schema })
+export const db = drizzle(sql, { schema })
 
