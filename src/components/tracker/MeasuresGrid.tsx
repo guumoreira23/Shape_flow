@@ -170,6 +170,52 @@ export function MeasuresGrid({
     return goals.find((g) => g.measureTypeId === measureId)?.targetValue
   }
 
+  const handleEditMeasure = (measure: Measure) => {
+    setEditingMeasure(measure)
+    setEditMeasureName(measure.name)
+    setEditMeasureUnit(measure.unit)
+    setIsEditDialogOpen(true)
+  }
+
+  const handleSaveEdit = async () => {
+    if (!editingMeasure || !editMeasureName.trim() || !editMeasureUnit.trim()) {
+      toast({
+        title: "Preencha todos os campos",
+        variant: "destructive",
+      })
+      return
+    }
+
+    try {
+      const response = await fetch(`/api/measure-types/${editingMeasure.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: editMeasureName.trim(),
+          unit: editMeasureUnit.trim(),
+        }),
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || "Erro ao atualizar medida")
+      }
+
+      toast({
+        title: "Medida atualizada com sucesso!",
+      })
+      setIsEditDialogOpen(false)
+      setEditingMeasure(null)
+      onMeasureUpdate?.()
+    } catch (error: any) {
+      toast({
+        title: "Erro ao atualizar medida",
+        description: error.message,
+        variant: "destructive",
+      })
+    }
+  }
+
   return (
     <div className="w-full overflow-x-auto rounded-lg border border-slate-800/50">
       <div className="inline-block min-w-full">
