@@ -9,17 +9,8 @@ export default async function AdminPage() {
   try {
     // Verificar sessão primeiro
     const { user, session } = await getSession()
-    
-    console.log("Admin page - Session check:", {
-      hasUser: !!user,
-      hasSession: !!session,
-      userId: user?.id,
-      userEmail: user?.email,
-      userRole: user?.role,
-    })
 
     if (!user || !session) {
-      console.log("Admin page - No user or session, redirecting to login")
       redirect("/login")
     }
 
@@ -33,32 +24,23 @@ export default async function AdminPage() {
       },
     })
 
-    console.log("Admin page - DB user:", {
-      dbUser: dbUser,
-      dbRole: dbUser?.role,
-      sessionRole: user.role,
-    })
-
     if (!dbUser) {
-      console.log("Admin page - No DB user found, redirecting to login")
       redirect("/login")
     }
 
     const userIsAdmin = dbUser.role === "admin"
-    console.log("Admin page - Is admin?", userIsAdmin)
 
     if (!userIsAdmin) {
-      console.log("Admin page - Not admin, redirecting to dashboard")
       redirect("/dashboard")
     }
 
     return <AdminPanel userIsAdmin={userIsAdmin} />
   } catch (error: any) {
-    console.error("Admin page error:", {
-      message: error?.message,
-      stack: error?.stack,
-      name: error?.name,
-    })
+    // Se o erro for um redirect, apenas propagar
+    if (error && typeof error === "object" && "digest" in error) {
+      throw error
+    }
+    console.error("Admin page error:", error)
     redirect("/login")
   }
 }

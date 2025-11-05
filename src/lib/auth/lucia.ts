@@ -57,21 +57,24 @@ export async function getSession() {
       const cookieStore = await cookies()
       const sessionCookie = lucia.createSessionCookie(result.session.id)
       cookieStore.set(sessionCookie.name, sessionCookie.value, {
-        path: ".",
         ...sessionCookie.attributes,
+        path: "/", // Consistente com a configuração do Lucia
       })
     }
     if (!result.session) {
       const cookieStore = await cookies()
       const sessionCookie = lucia.createBlankSessionCookie()
       cookieStore.set(sessionCookie.name, sessionCookie.value, {
-        path: ".",
         ...sessionCookie.attributes,
+        path: "/", // Consistente com a configuração do Lucia
       })
     }
   } catch (error) {
     // Next.js throws error when attempting to set cookies during rendering
-    console.error("getSession - Cookie error:", error)
+    // Isso é normal em Server Components, então apenas logamos em desenvolvimento
+    if (process.env.NODE_ENV === "development") {
+      console.error("getSession - Cookie error (expected in some contexts):", error)
+    }
   }
   return result
 }
