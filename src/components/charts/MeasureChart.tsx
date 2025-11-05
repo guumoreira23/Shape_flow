@@ -2,6 +2,7 @@
 
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ReferenceLine, ResponsiveContainer } from "recharts"
 import { formatDateDisplay } from "@/lib/utils/date"
+import { formatNumber } from "@/lib/utils/number"
 
 interface DataPoint {
   date: string
@@ -55,6 +56,7 @@ export function MeasureChart({
               borderRadius: "6px",
             }}
             labelStyle={{ color: "#e2e8f0" }}
+            formatter={(value: number) => formatNumber(value, 0)}
           />
           <Legend />
           <Line

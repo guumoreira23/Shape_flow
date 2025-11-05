@@ -2,6 +2,7 @@
 
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts"
 import { formatDateDisplay } from "@/lib/utils/date"
+import { formatNumber } from "@/lib/utils/number"
 
 interface DataPoint {
   date: string
@@ -47,6 +48,7 @@ export function MultiLineChart({ data, lines }: MultiLineChartProps) {
               borderRadius: "6px",
             }}
             labelStyle={{ color: "#e2e8f0" }}
+            formatter={(value: number) => formatNumber(value, 0)}
           />
           <Legend />
           {lines.map((line) => (

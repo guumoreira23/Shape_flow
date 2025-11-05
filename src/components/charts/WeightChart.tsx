@@ -1,6 +1,7 @@
 "use client"
 
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
+import { formatNumber } from "@/lib/utils/number"
 
 interface WeightChartProps {
   data: Array<{ date: string; value: number }>
@@ -29,6 +30,7 @@ export function WeightChart({ data, goal }: WeightChartProps) {
               borderRadius: "6px",
             }}
             labelStyle={{ color: "#e2e8f0" }}
+            formatter={(value: number) => formatNumber(value, 0)}
           />
           <Line
             type="monotone"
