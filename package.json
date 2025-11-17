@@ -10,7 +10,8 @@
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "create-admin": "tsx scripts/create-admin.ts",
-    "reset-admin": "tsx scripts/reset-admin-password.ts"
+    "reset-admin": "tsx scripts/reset-admin-password.ts",
+    "migrate:deadline": "tsx scripts/add-deadline-to-goals.ts"
   },
   "dependencies": {
     "@lucia-auth/adapter-postgresql": "^3.0.1",
