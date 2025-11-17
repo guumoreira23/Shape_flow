@@ -733,6 +733,51 @@ export function AdminDashboard({
             </table>
           </div>
         </section>
+        )}
+
+        {activeTab === "audit" && (
+          <section className="card-minimal">
+            <div className="border-b border-slate-800/50 p-4 sm:p-6">
+              <h2 className="text-xl font-semibold text-white">Logs de Auditoria</h2>
+              <p className="text-sm text-minimal-muted mt-2">
+                Histórico de ações realizadas pelos usuários no sistema.
+              </p>
+            </div>
+            <div className="overflow-x-auto">
+              {isLoadingAudit ? (
+                <div className="p-8 text-center text-slate-400">Carregando logs...</div>
+              ) : auditLogs.length === 0 ? (
+                <div className="p-8 text-center text-slate-400">Nenhum log encontrado.</div>
+              ) : (
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-slate-800/50 text-left text-xs sm:text-sm text-minimal-muted">
+                      <th className="p-3 sm:p-4 font-medium">Usuário</th>
+                      <th className="p-3 sm:p-4 font-medium">Ação</th>
+                      <th className="p-3 sm:p-4 font-medium">Entidade</th>
+                      <th className="p-3 sm:p-4 font-medium hidden sm:table-cell">Data</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {auditLogs.map((log) => (
+                      <tr
+                        key={log.id}
+                        className="border-b border-slate-800/40 transition-colors hover:bg-slate-800/40"
+                      >
+                        <td className="p-3 sm:p-4 text-sm text-white">{log.userId}</td>
+                        <td className="p-3 sm:p-4 text-sm text-white">{log.action}</td>
+                        <td className="p-3 sm:p-4 text-sm text-white">{log.entityType}</td>
+                        <td className="p-3 sm:p-4 text-sm text-slate-300 hidden sm:table-cell">
+                          {formatDateTime(log.createdAt)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          </section>
+        )}
 
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogContent className="max-w-lg">
