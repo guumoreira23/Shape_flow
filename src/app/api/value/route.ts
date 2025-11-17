@@ -41,6 +41,7 @@ export async function POST(request: NextRequest) {
         .update(measurementValues)
         .set({
           value: validatedData.value,
+          notes: validatedData.notes || null,
           updatedAt: new Date(),
         })
         .where(eq(measurementValues.id, existingValue.id))
@@ -55,6 +56,7 @@ export async function POST(request: NextRequest) {
         entryId: validatedData.entryId,
         measureTypeId: validatedData.measureTypeId,
         value: validatedData.value,
+        notes: validatedData.notes || null,
       })
       .returning()
 

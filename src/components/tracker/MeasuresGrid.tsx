@@ -43,6 +43,7 @@ interface Value {
   entryId: number
   measureTypeId: number
   value: number
+  notes?: string | null
 }
 
 interface Goal {

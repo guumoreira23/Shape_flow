@@ -21,6 +21,14 @@ import { getTodayDate, formatDate, parseDate } from "@/lib/utils/date"
 import { Calendar } from "@/components/ui/calendar"
 import { format } from "date-fns"
 import { Skeleton } from "@/components/ui/skeleton"
+import { MEASURE_SUGGESTIONS, UNIT_SUGGESTIONS } from "@/lib/utils/measureSuggestions"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 interface Measure {
   id: number
@@ -433,21 +441,58 @@ export function TrackerClient({ userIsAdmin = false }: TrackerClientProps) {
             <div className="space-y-4">
               <div>
                 <Label htmlFor="name">Nome da Medida</Label>
-                <Input
-                  id="name"
-                  value={newMeasureName}
-                  onChange={(e) => setNewMeasureName(e.target.value)}
-                  placeholder="Ex: Peso, Cintura, Quadril"
-                />
+                <div className="space-y-2">
+                  <Input
+                    id="name"
+                    value={newMeasureName}
+                    onChange={(e) => setNewMeasureName(e.target.value)}
+                    placeholder="Ex: Peso, Cintura, Quadril"
+                  />
+                  <div className="flex flex-wrap gap-2">
+                    {MEASURE_SUGGESTIONS.slice(0, 6).map((suggestion) => (
+                      <Button
+                        key={suggestion.name}
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="text-xs h-7"
+                        onClick={() => {
+                          setNewMeasureName(suggestion.name)
+                          setNewMeasureUnit(suggestion.unit)
+                        }}
+                      >
+                        {suggestion.name} ({suggestion.unit})
+                      </Button>
+                    ))}
+                  </div>
+                  <p className="text-xs text-slate-400">
+                    Clique em uma sugestão para preencher automaticamente
+                  </p>
+                </div>
               </div>
               <div>
                 <Label htmlFor="unit">Unidade</Label>
-                <Input
-                  id="unit"
-                  value={newMeasureUnit}
-                  onChange={(e) => setNewMeasureUnit(e.target.value)}
-                  placeholder="Ex: kg, cm"
-                />
+                <div className="space-y-2">
+                  <Select value={newMeasureUnit} onValueChange={setNewMeasureUnit}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione ou digite uma unidade" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {UNIT_SUGGESTIONS.map((unit) => (
+                        <SelectItem key={unit.unit} value={unit.unit}>
+                          {unit.unit} - {unit.description}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Input
+                    id="unit"
+                    value={newMeasureUnit}
+                    onChange={(e) => setNewMeasureUnit(e.target.value)}
+                    placeholder="Ou digite: kg, cm, %, mmHg, etc"
+                    className="mt-2"
+                  />
+                </div>
               </div>
             </div>
             <DialogFooter>

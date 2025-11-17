@@ -44,6 +44,7 @@ export const createValueSchema = z.object({
     .int("Valor deve ser um número inteiro")
     .positive("Valor deve ser positivo")
     .max(999999, "Valor muito grande"),
+  notes: z.string().max(500, "Notas muito longas").optional(),
 })
 
 export const createGoalSchema = z.object({
