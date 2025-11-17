@@ -285,7 +285,8 @@ export function TrackerClient({ userIsAdmin = false }: TrackerClientProps) {
     }
   }
 
-  if (isLoading) {
+  // Mostrar loading enquanto verifica autenticação ou carrega dados
+  if (isLoading || isAuthenticated === null) {
     return (
       <MainLayout userIsAdmin={userIsAdmin}>
         <div className="space-y-6">
@@ -299,6 +300,11 @@ export function TrackerClient({ userIsAdmin = false }: TrackerClientProps) {
         </div>
       </MainLayout>
     )
+  }
+
+  // Se não autenticado, não renderizar (já redirecionou)
+  if (!isAuthenticated) {
+    return null
   }
 
   return (
