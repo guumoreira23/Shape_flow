@@ -74,6 +74,7 @@ export const goals = pgTable(
       .notNull()
       .references(() => measurementTypes.id, { onDelete: "cascade" }),
     targetValue: integer("target_value").notNull(),
+    deadline: timestamp("deadline"),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").notNull().defaultNow(),
   },

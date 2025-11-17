@@ -53,6 +53,10 @@ export const createGoalSchema = z.object({
     .int("Meta deve ser um número inteiro")
     .positive("Meta deve ser positiva")
     .max(999999, "Meta muito grande"),
+  deadline: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Formato de data inválido (use YYYY-MM-DD)")
+    .optional(),
 })
 
 export const createMeasureTypeSchema = z.object({

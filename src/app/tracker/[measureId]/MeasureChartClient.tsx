@@ -28,6 +28,7 @@ interface Goal {
   id: number
   measureTypeId: number
   targetValue: number
+  deadline?: Date | string | null
 }
 
 interface MeasureChartClientProps {
@@ -49,16 +50,33 @@ export function MeasureChartClient({
   const { toast } = useToast()
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [goalValue, setGoalValue] = useState(goal?.targetValue.toString() || "")
+  const [goalDeadline, setGoalDeadline] = useState(() => {
+    if (goal?.deadline) {
+      const date = typeof goal.deadline === 'string' ? new Date(goal.deadline) : goal.deadline
+      return date.toISOString().split('T')[0]
+    }
+    return ""
+  })
 
-  const handleGoalChange = async (value: number) => {
+  const handleGoalChange = async (value: number, deadline?: string) => {
     try {
+      const body: {
+        measureTypeId: number
+        targetValue: number
+        deadline?: string
+      } = {
+        measureTypeId: measureId,
+        targetValue: value,
+      }
+
+      if (deadline && deadline.trim()) {
+        body.deadline = deadline
+      }
+
       const response = await fetch("/api/goal", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          measureTypeId: measureId,
-          targetValue: value,
-        }),
+        body: JSON.stringify(body),
       })
 
       if (!response.ok) throw new Error("Erro ao salvar meta")
@@ -81,11 +99,12 @@ export function MeasureChartClient({
     if (isNaN(numValue) || numValue <= 0) {
       toast({
         title: "Valor inválido",
+        description: "Informe um valor positivo para a meta",
         variant: "destructive",
       })
       return
     }
-    handleGoalChange(numValue)
+    handleGoalChange(numValue, goalDeadline)
   }
 
   return (
@@ -107,6 +126,11 @@ export function MeasureChartClient({
                 {goal && (
                   <span className="ml-3 text-lg font-normal text-blue-400">
                     – meta {goal.targetValue} {measure.unit}
+                    {goal.deadline && (
+                      <span className="ml-2 text-sm text-slate-400">
+                        (até {new Date(goal.deadline).toLocaleDateString('pt-BR')})
+                      </span>
+                    )}
                   </span>
                 )}
               </h1>
@@ -134,6 +158,19 @@ export function MeasureChartClient({
                     onChange={(e) => setGoalValue(e.target.value)}
                     placeholder="Ex: 70"
                   />
+                </div>
+                <div>
+                  <Label htmlFor="goalDeadline">Data Limite (opcional)</Label>
+                  <Input
+                    id="goalDeadline"
+                    type="date"
+                    value={goalDeadline}
+                    onChange={(e) => setGoalDeadline(e.target.value)}
+                    min={new Date().toISOString().split('T')[0]}
+                  />
+                  <p className="text-xs text-slate-400 mt-1">
+                    Defina uma data limite para alcançar esta meta
+                  </p>
                 </div>
               </div>
               <DialogFooter>

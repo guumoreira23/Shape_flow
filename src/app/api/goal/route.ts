@@ -34,13 +34,23 @@ export async function POST(request: NextRequest) {
         ),
     })
 
+    const goalData: {
+      targetValue: number
+      deadline?: Date
+      updatedAt: Date
+    } = {
+      targetValue: validatedData.targetValue,
+      updatedAt: new Date(),
+    }
+
+    if (validatedData.deadline) {
+      goalData.deadline = new Date(validatedData.deadline + "T00:00:00")
+    }
+
     if (existingGoal) {
       const [updatedGoal] = await db
         .update(goals)
-        .set({
-          targetValue: validatedData.targetValue,
-          updatedAt: new Date(),
-        })
+        .set(goalData)
         .where(eq(goals.id, existingGoal.id))
         .returning()
 
@@ -53,6 +63,7 @@ export async function POST(request: NextRequest) {
         userId: user.id,
         measureTypeId: validatedData.measureTypeId,
         targetValue: validatedData.targetValue,
+        deadline: goalData.deadline,
       })
       .returning()
 
