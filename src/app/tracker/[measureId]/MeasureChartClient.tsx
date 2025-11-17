@@ -108,6 +108,33 @@ export function MeasureChartClient({
     handleGoalChange(numValue, goalDeadline)
   }
 
+  const handleExportPDF = async () => {
+    try {
+      const response = await fetch(
+        `/api/export/pdf?measureTypeId=${measureId}`,
+        { credentials: "include" }
+      )
+
+      if (!response.ok) {
+        throw new Error("Erro ao gerar PDF")
+      }
+
+      const pdfData = await response.json()
+      generatePDFReport(pdfData)
+
+      toast({
+        title: "PDF gerado com sucesso!",
+        description: "A janela de impressão será aberta em breve.",
+      })
+    } catch (error: any) {
+      toast({
+        title: "Erro ao gerar PDF",
+        description: error.message,
+        variant: "destructive",
+      })
+    }
+  }
+
   return (
     <MainLayout userIsAdmin={userIsAdmin}>
       <div className="space-y-6">
