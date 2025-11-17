@@ -98,6 +98,8 @@ export function DiarioClient({ userIsAdmin = false }: DiarioClientProps) {
   const [nutritionGoal, setNutritionGoal] = useState<NutritionGoal | null>(null)
   const [isFoodDialogOpen, setIsFoodDialogOpen] = useState(false)
   const [isGoalDialogOpen, setIsGoalDialogOpen] = useState(false)
+  const [isBarcodeScannerOpen, setIsBarcodeScannerOpen] = useState(false)
+  const [barcodeInput, setBarcodeInput] = useState("")
   const [searchQuery, setSearchQuery] = useState("")
   const [foods, setFoods] = useState<Food[]>([])
   const [selectedMealType, setSelectedMealType] = useState("café")
@@ -625,6 +627,40 @@ export function DiarioClient({ userIsAdmin = false }: DiarioClientProps) {
                 Cancelar
               </Button>
               <Button onClick={handleSaveGoal}>Salvar</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dialog de scanner de código de barras */}
+        <Dialog open={isBarcodeScannerOpen} onOpenChange={setIsBarcodeScannerOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Scanner de Código de Barras</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Código de Barras</Label>
+                <Input
+                  value={barcodeInput}
+                  onChange={(e) => setBarcodeInput(e.target.value)}
+                  placeholder="Digite ou escaneie o código de barras"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      handleBarcodeSearch()
+                    }
+                  }}
+                  autoFocus
+                />
+                <p className="text-xs text-minimal-muted mt-1">
+                  Digite o código de barras do produto ou use um scanner físico
+                </p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsBarcodeScannerOpen(false)}>
+                Cancelar
+              </Button>
+              <Button onClick={handleBarcodeSearch}>Buscar</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
