@@ -1,7 +1,7 @@
 "use client"
 
-import { useCallback, useMemo, useState } from "react"
-import { Users, Shield, RefreshCcw, Search, UserPlus, ShieldCheck, UserCog, Trash2, KeyRound } from "lucide-react"
+import { useCallback, useMemo, useState, useEffect } from "react"
+import { Users, Shield, RefreshCcw, Search, UserPlus, ShieldCheck, UserCog, Trash2, KeyRound, FileText, Calendar } from "lucide-react"
 import { MainLayout } from "@/components/layout/MainLayout"
 import { Button } from "@/components/ui/button"
 import {
@@ -92,7 +92,11 @@ export function AdminDashboard({
   const [stats, setStats] = useState<AdminMetrics>(metrics)
   const [searchTerm, setSearchTerm] = useState("")
   const [roleFilter, setRoleFilter] = useState<RoleFilter>("all")
+  const [dateFilter, setDateFilter] = useState<string>("") // Filtro por data de cadastro
   const [isSyncing, setIsSyncing] = useState(false)
+  const [activeTab, setActiveTab] = useState<"users" | "audit">("users")
+  const [auditLogs, setAuditLogs] = useState<any[]>([])
+  const [isLoadingAudit, setIsLoadingAudit] = useState(false)
 
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [newUserEmail, setNewUserEmail] = useState("")
@@ -437,7 +441,33 @@ export function AdminDashboard({
     }
   }
 
-  const hasFilters = searchTerm.trim().length > 0 || roleFilter !== "all"
+  const hasFilters = searchTerm.trim().length > 0 || roleFilter !== "all" || dateFilter !== ""
+
+  const loadAuditLogs = async () => {
+    setIsLoadingAudit(true)
+    try {
+      const response = await fetch("/api/admin/audit", {
+        credentials: "include",
+      })
+      if (!response.ok) throw new Error("Erro ao carregar logs")
+      const data = await response.json()
+      setAuditLogs(data)
+    } catch (error) {
+      console.error("Error loading audit logs:", error)
+      toast({
+        title: "Erro ao carregar logs de auditoria",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoadingAudit(false)
+    }
+  }
+
+  useEffect(() => {
+    if (activeTab === "audit") {
+      loadAuditLogs()
+    }
+  }, [activeTab])
 
   return (
     <MainLayout userIsAdmin>
@@ -553,6 +583,16 @@ export function AdminDashboard({
                     {roleFilterLabels[filter]}
                   </Button>
                 ))}
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4 text-slate-500" />
+                  <Input
+                    type="date"
+                    value={dateFilter}
+                    onChange={(e) => setDateFilter(e.target.value)}
+                    className="w-40 text-sm"
+                    placeholder="Filtrar por data"
+                  />
+                </div>
               </div>
             </div>
 
@@ -565,6 +605,7 @@ export function AdminDashboard({
                 <Button variant="ghost" className="text-slate-400 hover:text-white" onClick={() => {
                   setSearchTerm("")
                   setRoleFilter("all")
+                  setDateFilter("")
                 }}>
                   Limpar filtros
                 </Button>

@@ -209,3 +209,74 @@ export const fastingSchedules = pgTable(
   })
 )
 
+// Fase 5 - Receitas e Planejamento Alimentar
+export const recipes = pgTable("recipes", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  name: text("name").notNull(),
+  description: text("description"),
+  imageUrl: text("image_url"),
+  servings: integer("servings").notNull().default(1),
+  prepTime: integer("prep_time"), // Tempo de preparo em minutos
+  cookTime: integer("cook_time"), // Tempo de cozimento em minutos
+  calories: integer("calories").notNull(),
+  protein: real("protein").notNull(),
+  carbs: real("carbs").notNull(),
+  fat: real("fat").notNull(),
+  fiber: real("fiber").default(0),
+  tags: text("tags"), // JSON array: ["vegetariano", "vegano", "low-carb"]
+  difficulty: text("difficulty").default("médio"), // fácil, médio, difícil
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+})
+
+export const recipeIngredients = pgTable("recipe_ingredients", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  recipeId: integer("recipe_id")
+    .notNull()
+    .references(() => recipes.id, { onDelete: "cascade" }),
+  foodItemId: integer("food_item_id")
+    .references(() => foodItems.id, { onDelete: "set null" }),
+  name: text("name").notNull(), // Nome do ingrediente (pode não estar no banco)
+  quantity: real("quantity").notNull(),
+  unit: text("unit").notNull().default("g"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+})
+
+export const mealPlans = pgTable("meal_plans", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  weekStartDate: timestamp("week_start_date").notNull(), // Data de início da semana
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+})
+
+export const mealPlanRecipes = pgTable("meal_plan_recipes", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  mealPlanId: integer("meal_plan_id")
+    .notNull()
+    .references(() => mealPlans.id, { onDelete: "cascade" }),
+  recipeId: integer("recipe_id")
+    .notNull()
+    .references(() => recipes.id, { onDelete: "cascade" }),
+  dayOfWeek: integer("day_of_week").notNull(), // 0 = domingo, 1 = segunda, etc
+  mealType: text("meal_type").notNull(), // café, almoço, jantar, lanche
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+})
+
+// Fase 9 - Auditoria e Logs
+export const auditLogs = pgTable("audit_logs", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  action: text("action").notNull(), // "create", "update", "delete"
+  entityType: text("entity_type").notNull(), // "measurement", "goal", "meal", etc
+  entityId: text("entity_id"),
+  details: text("details"), // JSON com detalhes da ação
+  ipAddress: text("ip_address"),
+  userAgent: text("user_agent"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+})
+
