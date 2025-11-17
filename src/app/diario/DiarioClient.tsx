@@ -352,6 +352,10 @@ export function DiarioClient({ userIsAdmin = false }: DiarioClientProps) {
               <Target className="h-4 w-4 mr-2" />
               Metas
             </Button>
+            <Button variant="outline" onClick={() => setIsBarcodeScannerOpen(true)}>
+              <ScanLine className="h-4 w-4 mr-2" />
+              Scanner
+            </Button>
             <Button onClick={() => setIsFoodDialogOpen(true)}>
               <Plus className="h-4 w-4 mr-2" />
               Adicionar Alimento

@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LayoutDashboard, BarChart3, Users, LogOut, X, UtensilsCrossed, Droplet, Timer, Moon, Sun } from "lucide-react"
+import { LayoutDashboard, BarChart3, Users, LogOut, X, UtensilsCrossed, Droplet, Timer, Moon, Sun, ChefHat } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { useTheme } from "@/components/ThemeProvider"
