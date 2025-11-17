@@ -14,9 +14,10 @@ import {
   DialogTrigger,
   DialogFooter,
 } from "@/components/ui/dialog"
-import { ArrowLeft, Target } from "lucide-react"
+import { ArrowLeft, Target, Download, FileText } from "lucide-react"
 import { MainLayout } from "@/components/layout/MainLayout"
 import { useToast } from "@/components/ui/use-toast"
+import { generatePDFReport } from "@/lib/utils/pdfExport"
 
 interface Measure {
   id: number
