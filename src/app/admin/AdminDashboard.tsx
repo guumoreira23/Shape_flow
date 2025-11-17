@@ -1,7 +1,7 @@
 "use client"
 
 import { useCallback, useMemo, useState } from "react"
-import { Users, Shield, RefreshCcw, Search, UserPlus, ShieldCheck, UserCog, Trash2 } from "lucide-react"
+import { Users, Shield, RefreshCcw, Search, UserPlus, ShieldCheck, UserCog, Trash2, KeyRound } from "lucide-react"
 import { MainLayout } from "@/components/layout/MainLayout"
 import { Button } from "@/components/ui/button"
 import {
@@ -108,6 +108,12 @@ export function AdminDashboard({
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [userPendingDeletion, setUserPendingDeletion] = useState<AdminUser | null>(null)
   const [isDeletingUser, setIsDeletingUser] = useState(false)
+
+  const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false)
+  const [userPendingPasswordReset, setUserPendingPasswordReset] = useState<AdminUser | null>(null)
+  const [newPassword, setNewPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
+  const [isResettingPassword, setIsResettingPassword] = useState(false)
 
   const recalcStats = useCallback(
     (list: AdminUser[]): AdminMetrics => {
@@ -360,6 +366,77 @@ export function AdminDashboard({
     }
   }
 
+  const openPasswordDialog = (user: AdminUser) => {
+    setUserPendingPasswordReset(user)
+    setNewPassword("")
+    setConfirmPassword("")
+    setIsPasswordDialogOpen(true)
+  }
+
+  const handleResetPassword = async () => {
+    if (!userPendingPasswordReset) return
+
+    if (!newPassword.trim() || !confirmPassword.trim()) {
+      toast({
+        title: "Preencha todos os campos",
+        description: "Informe a nova senha e confirmação.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    if (newPassword.length < 6) {
+      toast({
+        title: "Senha muito curta",
+        description: "A senha deve ter pelo menos 6 caracteres.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    if (newPassword !== confirmPassword) {
+      toast({
+        title: "Senhas não coincidem",
+        description: "As senhas informadas não são iguais.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    setIsResettingPassword(true)
+    try {
+      const response = await fetch(`/api/admin/users/${userPendingPasswordReset.id}/password`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: newPassword }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data?.error || "Erro ao resetar senha")
+      }
+
+      toast({
+        title: "Senha atualizada",
+        description: `A senha de ${userPendingPasswordReset.email} foi alterada com sucesso.`,
+      })
+
+      setIsPasswordDialogOpen(false)
+      setUserPendingPasswordReset(null)
+      setNewPassword("")
+      setConfirmPassword("")
+    } catch (error: any) {
+      toast({
+        title: "Erro ao resetar senha",
+        description: error?.message || "Tente novamente em instantes.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsResettingPassword(false)
+    }
+  }
+
   const hasFilters = searchTerm.trim().length > 0 || roleFilter !== "all"
 
   return (
@@ -560,6 +637,15 @@ export function AdminDashboard({
                             <span className="hidden sm:inline">Permissões</span>
                           </Button>
                           <Button
+                            variant="outline"
+                            size="sm"
+                            className="gap-1 sm:gap-2 text-xs sm:text-sm text-yellow-400 border-yellow-500/40 hover:bg-yellow-500/10"
+                            onClick={() => openPasswordDialog(user)}
+                          >
+                            <KeyRound className="h-3 w-3 sm:h-4 sm:w-4" />
+                            <span className="hidden sm:inline">Senha</span>
+                          </Button>
+                          <Button
                             variant="ghost"
                             size="sm"
                             className="text-red-400 hover:text-red-300 hover:bg-red-500/10 p-2"
@@ -659,6 +745,51 @@ export function AdminDashboard({
               </Button>
               <Button onClick={handleUpdateRole} disabled={isUpdatingRole}>
                 {isUpdatingRole ? "Salvando..." : "Salvar alterações"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={isPasswordDialogOpen} onOpenChange={setIsPasswordDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Resetar senha</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Email</Label>
+                <p className="mt-1 text-sm text-white">{userPendingPasswordReset?.email}</p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="newPassword">Nova senha</Label>
+                <Input
+                  id="newPassword"
+                  type="password"
+                  value={newPassword}
+                  onChange={(event) => setNewPassword(event.target.value)}
+                  placeholder="Mínimo de 6 caracteres"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword">Confirmar senha</Label>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(event) => setConfirmPassword(event.target.value)}
+                  placeholder="Digite a senha novamente"
+                />
+              </div>
+              <p className="text-xs text-slate-400">
+                A senha será alterada imediatamente. O usuário precisará usar a nova senha no próximo login.
+              </p>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsPasswordDialogOpen(false)}>
+                Cancelar
+              </Button>
+              <Button onClick={handleResetPassword} disabled={isResettingPassword}>
+                {isResettingPassword ? "Salvando..." : "Salvar senha"}
               </Button>
             </DialogFooter>
           </DialogContent>
