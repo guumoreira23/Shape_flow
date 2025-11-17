@@ -35,7 +35,7 @@ if (!DATABASE_URL) {
 }
 
 async function migrateTheme() {
-  const sql = postgres(DATABASE_URL)
+  const sql = postgres(DATABASE_URL as string)
 
   try {
     console.log("🔄 Iniciando migração: adicionar coluna 'theme' à tabela users...")
