@@ -138,13 +138,18 @@ export function MeasureChartClient({
               <p className="text-minimal-muted">{measure.unit}</p>
             </div>
           </div>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button variant="outline" className="gap-2">
-                <Target className="h-4 w-4" />
-                {goal ? "Editar Meta" : "Definir Meta"}
-              </Button>
-            </DialogTrigger>
+          <div className="flex gap-2">
+            <Button variant="outline" className="gap-2" onClick={handleExportPDF}>
+              <FileText className="h-4 w-4" />
+              Exportar PDF
+            </Button>
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="gap-2">
+                  <Target className="h-4 w-4" />
+                  {goal ? "Editar Meta" : "Definir Meta"}
+                </Button>
+              </DialogTrigger>
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Definir Meta</DialogTitle>
@@ -182,6 +187,7 @@ export function MeasureChartClient({
               </DialogFooter>
             </DialogContent>
           </Dialog>
+          </div>
         </div>
 
         <div className="card-minimal p-6">
