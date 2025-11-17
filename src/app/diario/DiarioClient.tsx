@@ -252,6 +252,52 @@ export function DiarioClient({ userIsAdmin = false }: DiarioClientProps) {
     }
   }
 
+  const handleBarcodeSearch = async () => {
+    if (!barcodeInput.trim()) {
+      toast({
+        title: "Digite um código de barras",
+        variant: "destructive",
+      })
+      return
+    }
+
+    try {
+      // Buscar alimento por código de barras
+      const response = await fetch(`/api/foods?search=${encodeURIComponent(barcodeInput)}`, {
+        credentials: "include",
+      })
+
+      if (!response.ok) throw new Error("Erro ao buscar alimento")
+
+      const data = await response.json()
+      const foodWithBarcode = data.find((f: Food) => f.barcode === barcodeInput)
+
+      if (foodWithBarcode) {
+        setSelectedFood(foodWithBarcode)
+        setFoodQuantity(foodWithBarcode.servingSize?.toString() || "100")
+        setIsBarcodeScannerOpen(false)
+        setIsFoodDialogOpen(true)
+        setBarcodeInput("")
+        toast({
+          title: "Alimento encontrado!",
+          description: `Encontrado: ${foodWithBarcode.name}`,
+        })
+      } else {
+        toast({
+          title: "Alimento não encontrado",
+          description: "Este código de barras não está cadastrado no banco de dados",
+          variant: "destructive",
+        })
+      }
+    } catch (error: any) {
+      toast({
+        title: "Erro ao buscar código de barras",
+        description: error.message,
+        variant: "destructive",
+      })
+    }
+  }
+
   const handleSaveGoal = async () => {
     try {
       const response = await fetch("/api/nutrition-goals", {
