@@ -29,10 +29,16 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json(goal)
-  } catch (error) {
+  } catch (error: any) {
     console.error("Nutrition goals GET error:", error)
+    if (error.status === 401 || error.message === "Unauthorized") {
+      return NextResponse.json(
+        { error: "Não autorizado" },
+        { status: 401 }
+      )
+    }
     return NextResponse.json(
-      { error: "Erro ao buscar metas nutricionais" },
+      { error: "Erro ao buscar metas nutricionais", details: process.env.NODE_ENV === "development" ? error.message : undefined },
       { status: 500 }
     )
   }

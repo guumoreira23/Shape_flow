@@ -92,10 +92,17 @@ export async function GET(request: NextRequest) {
     )
 
     return NextResponse.json(entriesWithFoods)
-  } catch (error) {
+  } catch (error: any) {
     console.error("Meals GET error:", error)
+    // Se for erro de autenticação, retornar 401
+    if (error.status === 401 || error.message === "Unauthorized") {
+      return NextResponse.json(
+        { error: "Não autorizado" },
+        { status: 401 }
+      )
+    }
     return NextResponse.json(
-      { error: "Erro ao buscar refeições" },
+      { error: "Erro ao buscar refeições", details: process.env.NODE_ENV === "development" ? error.message : undefined },
       { status: 500 }
     )
   }

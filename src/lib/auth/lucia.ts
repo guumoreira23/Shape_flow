@@ -84,10 +84,23 @@ export async function getSession() {
 }
 
 export async function requireAuth() {
-  const { user, session } = await getSession()
-  if (!user || !session) {
-    throw new Error("Unauthorized")
+  try {
+    const { user, session } = await getSession()
+    if (!user || !session) {
+      const error = new Error("Unauthorized") as any
+      error.status = 401
+      throw error
+    }
+    return { user, session }
+  } catch (error: any) {
+    // Se já tem status, re-throw
+    if (error.status) {
+      throw error
+    }
+    // Caso contrário, adicionar status 401
+    const authError = new Error(error.message || "Unauthorized") as any
+    authError.status = 401
+    throw authError
   }
-  return { user, session }
 }
 
