@@ -30,11 +30,11 @@ export function MainLayout({ children, userIsAdmin = false }: MainLayoutProps) {
   }, [])
 
   if (!isMounted) {
-    return <div className="min-h-screen bg-slate-950">{children}</div>
+    return <div className="min-h-screen bg-slate-950 dark:bg-slate-950 bg-white">{children}</div>
   }
 
   return (
-    <div className="min-h-screen bg-slate-950">
+    <div className="min-h-screen bg-slate-950 dark:bg-slate-950 bg-white">
       <Sidebar userIsAdmin={userIsAdmin} isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       
       {/* Botão hambúrguer para mobile */}

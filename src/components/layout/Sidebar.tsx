@@ -2,9 +2,10 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LayoutDashboard, BarChart3, Users, LogOut, X, UtensilsCrossed, Droplet, Timer } from "lucide-react"
+import { LayoutDashboard, BarChart3, Users, LogOut, X, UtensilsCrossed, Droplet, Timer, Moon, Sun } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import { useTheme } from "@/components/ThemeProvider"
 
 interface NavItem {
   title: string
@@ -55,6 +56,7 @@ interface SidebarProps {
 
 export function Sidebar({ userIsAdmin = false, isOpen = false, onClose }: SidebarProps) {
   const pathname = usePathname()
+  const { theme, toggleTheme } = useTheme()
 
   const handleLogout = async () => {
     try {
@@ -132,7 +134,24 @@ export function Sidebar({ userIsAdmin = false, isOpen = false, onClose }: Sideba
             })}
           </nav>
 
-          <div className="p-4 border-t border-slate-800/50">
+          <div className="p-4 border-t border-slate-800/50 space-y-1">
+            <Button
+              variant="ghost"
+              className="w-full justify-start text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"
+              onClick={toggleTheme}
+            >
+              {theme === "dark" ? (
+                <>
+                  <Sun className="h-5 w-5 mr-3" />
+                  Tema Claro
+                </>
+              ) : (
+                <>
+                  <Moon className="h-5 w-5 mr-3" />
+                  Tema Escuro
+                </>
+              )}
+            </Button>
             <Button
               variant="ghost"
               className="w-full justify-start text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"

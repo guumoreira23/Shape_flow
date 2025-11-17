@@ -5,6 +5,7 @@ export const users = pgTable("users", {
   email: text("email").notNull().unique(),
   hashedPassword: text("hashed_password").notNull(),
   role: text("role").notNull().default("user"), // 'user' ou 'admin'
+  theme: text("theme").default("dark"), // 'light' ou 'dark'
   createdAt: timestamp("created_at").notNull().defaultNow(),
 })
 

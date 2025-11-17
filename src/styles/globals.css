@@ -25,6 +25,28 @@
     --ring: 224.3 76.3% 48%;
     --radius: 0.75rem;
   }
+
+  .light {
+    --background: 0 0% 100%;
+    --foreground: 222.2 47.4% 11.2%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 47.4% 11.2%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 47.4% 11.2%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 224.3 76.3% 48%;
+  }
 }
 
 @layer base {
@@ -32,22 +54,30 @@
     @apply border-border;
   }
   body {
-    @apply bg-slate-950 text-foreground antialiased;
+    @apply bg-slate-950 dark:bg-slate-950 bg-white text-foreground antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  
+  .dark body {
+    @apply bg-slate-950;
+  }
+  
+  .light body {
+    @apply bg-white;
   }
 }
 
 @layer utilities {
   .card-minimal {
-    @apply bg-slate-900/50 border border-slate-800/50 rounded-xl shadow-sm backdrop-blur-sm;
+    @apply bg-slate-900/50 dark:bg-slate-900/50 bg-white border border-slate-800/50 dark:border-slate-800/50 border-gray-200 rounded-xl shadow-sm backdrop-blur-sm;
   }
   
   .text-minimal {
-    @apply text-slate-200;
+    @apply text-slate-200 dark:text-slate-200 text-slate-900;
   }
   
   .text-minimal-muted {
-    @apply text-slate-400;
+    @apply text-slate-400 dark:text-slate-400 text-slate-600;
   }
 }
 
