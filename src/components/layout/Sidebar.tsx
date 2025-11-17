@@ -41,6 +41,11 @@ const navItems: NavItem[] = [
     icon: Timer,
   },
   {
+    title: "Receitas",
+    href: "/receitas",
+    icon: ChefHat,
+  },
+  {
     title: "Central Administrativa",
     href: "/admin",
     icon: Users,

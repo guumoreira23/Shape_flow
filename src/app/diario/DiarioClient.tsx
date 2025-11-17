@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/select"
 import { useToast } from "@/components/ui/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Plus, Search, Target, Trash2 } from "lucide-react"
+import { Plus, Search, Target, Trash2, ScanLine } from "lucide-react"
 import { formatDateDisplay, getTodayDate, formatDate } from "@/lib/utils/date"
 import { Calendar } from "@/components/ui/calendar"
 import { format } from "date-fns"
