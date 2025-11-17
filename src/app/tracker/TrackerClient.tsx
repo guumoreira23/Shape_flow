@@ -58,6 +58,7 @@ export function TrackerClient({ userIsAdmin = false }: TrackerClientProps) {
   const [values, setValues] = useState<Value[]>([])
   const [goals, setGoals] = useState<Goal[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isDateDialogOpen, setIsDateDialogOpen] = useState(false)
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false)
@@ -69,8 +70,16 @@ export function TrackerClient({ userIsAdmin = false }: TrackerClientProps) {
 
   const loadData = async () => {
     try {
-      const response = await fetch("/api/tracker")
-      if (!response.ok) throw new Error("Erro ao carregar dados")
+      const response = await fetch("/api/tracker", {
+        credentials: "include",
+      })
+      if (!response.ok) {
+        if (response.status === 401) {
+          router.replace("/login")
+          return
+        }
+        throw new Error("Erro ao carregar dados")
+      }
       const data = await response.json()
       setMeasures(data.measures)
       setEntries(data.entries)
@@ -91,6 +100,33 @@ export function TrackerClient({ userIsAdmin = false }: TrackerClientProps) {
     }
   }
 
+  // Verificar autenticação via API ao montar o componente
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await fetch("/api/auth/check", {
+          credentials: "include",
+        })
+        const data = await response.json()
+
+        if (data.authenticated) {
+          setIsAuthenticated(true)
+          // Carregar dados após confirmar autenticação
+          await loadData()
+        } else {
+          setIsAuthenticated(false)
+          router.replace("/login")
+        }
+      } catch (error) {
+        console.error("Erro ao verificar autenticação:", error)
+        setIsAuthenticated(false)
+        router.replace("/login")
+      }
+    }
+
+    checkAuth()
+  }, [router])
+
   const createTodayEntry = async () => {
     try {
       const response = await fetch("/api/date", {
@@ -107,10 +143,6 @@ export function TrackerClient({ userIsAdmin = false }: TrackerClientProps) {
     }
   }
 
-  useEffect(() => {
-    loadData()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
 
   const handleAddMeasure = async () => {
     if (!newMeasureName.trim() || !newMeasureUnit.trim()) {
