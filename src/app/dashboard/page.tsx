@@ -1,255 +1,84 @@
-import { requireAuth } from "@/lib/auth/middleware"
-import { isAdmin } from "@/lib/auth/permissions"
+import { cookies } from "next/headers"
 import { db } from "@/db"
 import { measurementTypes, measurementEntries, measurementValues, goals } from "@/db/schema"
 import { eq, desc } from "drizzle-orm"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Plus, TrendingUp, Shield, ArrowRight } from "lucide-react"
-import { formatNumber } from "@/lib/utils/number"
-import { formatDateDisplay, formatDate } from "@/lib/utils/date"
-import { WeightChart } from "@/components/charts/WeightChart"
-import { MultiLineChart } from "@/components/charts/MultiLineChart"
-import { MainLayout } from "@/components/layout/MainLayout"
-import { Skeleton } from "@/components/ui/skeleton"
-import { ExportButton } from "@/components/ui/export-button"
+import { lucia } from "@/lib/auth/lucia"
+import { DashboardClient } from "./DashboardClient"
 
 export default async function DashboardPage() {
-  const { user } = await requireAuth()
-  let userIsAdmin = false
-  try {
-    userIsAdmin = await isAdmin()
-  } catch (error) {
-    console.error("Error checking admin status:", error)
-    // Continua como não-admin se houver erro
-  }
+  // Buscar dados do servidor para SSR inicial
+  // A validação de autenticação será feita no cliente via /api/auth/check
+  const cookieStore = await cookies()
+  const sessionId = cookieStore.get(lucia.sessionCookieName)?.value
 
-  const measures = await db.query.measurementTypes.findMany({
-    where: (types, { eq }) => eq(types.userId, user.id),
-    orderBy: (types, { desc }) => [desc(types.createdAt)],
-  })
+  let user = null
+  let measures: any[] = []
+  let entries: any[] = []
+  let values: any[] = []
+  let userGoals: any[] = []
 
-  const entries = await db.query.measurementEntries.findMany({
-    where: (entries, { eq }) => eq(entries.userId, user.id),
-    orderBy: (entries, { desc }) => [desc(entries.date)],
-    limit: 30,
-  })
+  // Tentar buscar dados se houver sessão (para SSR otimizado)
+  if (sessionId) {
+    try {
+      const validation = await lucia.validateSession(sessionId)
+      if (validation.session && validation.user) {
+        user = validation.user
+        const userId = validation.user.id
 
-  const values = await db.query.measurementValues.findMany({
-    where: (values, { inArray }) =>
-      inArray(
-        values.entryId,
-        entries.map((e) => e.id)
-      ),
-  })
-
-  const userGoals = await db.query.goals.findMany({
-    where: (goals, { eq }) => eq(goals.userId, user.id),
-  })
-
-  const weightMeasure = measures.find((m) => m.name.toLowerCase().includes("peso"))
-  const waistMeasure = measures.find((m) => m.name.toLowerCase().includes("cintura"))
-
-  const getLatestValue = (measureId: number) => {
-    const measureValues = values.filter((v) => v.measureTypeId === measureId)
-    if (measureValues.length === 0) return null
-    const entryIds = measureValues.map((v) => v.entryId)
-    const latestEntry = entries.find((e) => entryIds.includes(e.id))
-    if (!latestEntry) return null
-    const latestValue = measureValues.find((v) => v.entryId === latestEntry.id)
-    return latestValue?.value || null
-  }
-
-  const weightData = weightMeasure
-    ? entries
-        .map((entry) => {
-          const value = values.find(
-            (v) => v.entryId === entry.id && v.measureTypeId === weightMeasure.id
-          )
-          return value
-            ? {
-                date: formatDateDisplay(entry.date),
-                value: value.value,
-              }
-            : null
+        measures = await db.query.measurementTypes.findMany({
+          where: (types, { eq }) => eq(types.userId, userId),
+          orderBy: (types, { desc }) => [desc(types.createdAt)],
         })
-        .filter((d): d is { date: string; value: number } => d !== null)
-        .slice(-7)
-    : []
 
-  const weightGoal = weightMeasure
-    ? userGoals.find((g) => g.measureTypeId === weightMeasure.id)
-    : null
+        entries = await db.query.measurementEntries.findMany({
+          where: (entries, { eq }) => eq(entries.userId, userId),
+          orderBy: (entries, { desc }) => [desc(entries.date)],
+          limit: 30,
+        })
 
-  // Calcular diferença entre valor atual e meta
-  const getDifference = (measureId: number, goalValue: number | undefined) => {
-    if (!goalValue) return null
-    const currentValue = getLatestValue(measureId)
-    if (currentValue === null) return null
-    const diff = currentValue - goalValue
-    return diff
+        values = await db.query.measurementValues.findMany({
+          where: (values, { inArray }) =>
+            inArray(
+              values.entryId,
+              entries.map((e) => e.id)
+            ),
+        })
+
+        userGoals = await db.query.goals.findMany({
+          where: (goals, { eq }) => eq(goals.userId, userId),
+        })
+      }
+    } catch (error) {
+      // Se houver erro, deixar o cliente fazer a validação
+      console.error("Erro ao buscar dados do dashboard:", error)
+    }
   }
 
-  const weightDifference = weightMeasure && weightGoal
-    ? getDifference(weightMeasure.id, weightGoal.targetValue)
-    : null
+  // Se não houver dados, passar estrutura vazia (cliente fará validação)
+  const initialData = {
+    user: user || { email: "", role: "user" },
+    measures: measures.map((m) => ({
+      id: m.id,
+      name: m.name,
+      unit: m.unit,
+    })),
+    entries: entries.map((e) => ({
+      id: e.id,
+      date: e.date,
+    })),
+    values: values.map((v) => ({
+      id: v.id,
+      entryId: v.entryId,
+      measureTypeId: v.measureTypeId,
+      value: v.value,
+    })),
+    goals: userGoals.map((g) => ({
+      id: g.id,
+      measureTypeId: g.measureTypeId,
+      targetValue: g.targetValue,
+    })),
+  }
 
-  const waistGoal = waistMeasure
-    ? userGoals.find((g) => g.measureTypeId === waistMeasure.id)
-    : null
-
-  const waistDifference = waistMeasure && waistGoal
-    ? getDifference(waistMeasure.id, waistGoal.targetValue)
-    : null
-
-  // Preparar dados para gráfico múltiplo (Peso e Cintura)
-  const multiChartData = entries
-    .slice(-30) // Últimos 30 dias
-    .map((entry) => {
-      const weightValue = values.find(
-        (v) => v.entryId === entry.id && weightMeasure && v.measureTypeId === weightMeasure.id
-      )
-      const waistValue = values.find(
-        (v) => v.entryId === entry.id && waistMeasure && v.measureTypeId === waistMeasure.id
-      )
-      return {
-        date: formatDate(entry.date),
-        peso: weightValue ? weightValue.value : null,
-        cintura: waistValue ? waistValue.value : null,
-      }
-    })
-    .filter((d) => d.peso !== null || d.cintura !== null)
-
-  return (
-    <MainLayout userIsAdmin={userIsAdmin}>
-      <div className="space-y-8">
-        <div>
-          <h1 className="text-3xl font-semibold text-white mb-2">Dashboard</h1>
-          <p className="text-slate-400">Bem-vindo de volta, {user.email}</p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="card-minimal p-6">
-            <h3 className="text-sm font-medium text-minimal-muted mb-3">Último Peso</h3>
-            <p className="text-3xl font-semibold text-white mb-1">
-              {weightMeasure && getLatestValue(weightMeasure.id)
-                ? `${formatNumber(getLatestValue(weightMeasure.id)!)} ${weightMeasure.unit}`
-                : "N/A"}
-            </p>
-            {weightGoal && weightMeasure && (
-              <div className="mt-2 space-y-1">
-                <p className="text-sm text-minimal-muted">
-                  Meta: <span className="text-blue-400 font-medium">{weightGoal.targetValue} {weightMeasure.unit}</span>
-                </p>
-                {weightDifference !== null && (
-                  <p className={`text-sm font-medium ${
-                    weightDifference > 0 ? "text-red-400" : weightDifference < 0 ? "text-green-400" : "text-blue-400"
-                  }`}>
-                    {weightDifference > 0 ? "+" : ""}{formatNumber(weightDifference)} {weightMeasure.unit}
-                    {weightDifference > 0 ? " acima da meta" : weightDifference < 0 ? " abaixo da meta" : " na meta"}
-                  </p>
-                )}
-              </div>
-            )}
-          </div>
-
-          <div className="card-minimal p-6">
-            <h3 className="text-sm font-medium text-minimal-muted mb-3">Última Cintura</h3>
-            <p className="text-3xl font-semibold text-white mb-1">
-              {waistMeasure && getLatestValue(waistMeasure.id)
-                ? `${formatNumber(getLatestValue(waistMeasure.id)!)} ${waistMeasure.unit}`
-                : "N/A"}
-            </p>
-            {waistGoal && waistMeasure && (
-              <div className="mt-2 space-y-1">
-                <p className="text-sm text-minimal-muted">
-                  Meta: <span className="text-blue-400 font-medium">{waistGoal.targetValue} {waistMeasure.unit}</span>
-                </p>
-                {waistDifference !== null && (
-                  <p className={`text-sm font-medium ${
-                    waistDifference > 0 ? "text-red-400" : waistDifference < 0 ? "text-green-400" : "text-blue-400"
-                  }`}>
-                    {waistDifference > 0 ? "+" : ""}{formatNumber(waistDifference)} {waistMeasure.unit}
-                    {waistDifference > 0 ? " acima da meta" : waistDifference < 0 ? " abaixo da meta" : " na meta"}
-                  </p>
-                )}
-              </div>
-            )}
-          </div>
-
-          <div className="card-minimal p-6">
-            <h3 className="text-sm font-medium text-minimal-muted mb-3">Total de Lançamentos</h3>
-            <p className="text-3xl font-semibold text-white">{entries.length}</p>
-            <p className="text-sm text-minimal-muted mt-2">Registros totais</p>
-          </div>
-        </div>
-
-        {weightData.length > 0 && (
-          <div className="card-minimal p-6">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h2 className="text-xl font-semibold text-white mb-1 flex items-center gap-2">
-                  <TrendingUp className="h-5 w-5 text-blue-400" />
-                  Evolução do Peso
-                </h2>
-                <p className="text-sm text-minimal-muted">Últimos 7 dias</p>
-              </div>
-            </div>
-            <WeightChart data={weightData} goal={weightGoal?.targetValue} />
-          </div>
-        )}
-
-        {multiChartData.length > 0 && weightMeasure && waistMeasure && (
-          <div className="card-minimal p-6">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h2 className="text-xl font-semibold text-white mb-1 flex items-center gap-2">
-                  <TrendingUp className="h-5 w-5 text-blue-400" />
-                  Comparativo Peso e Cintura
-                </h2>
-                <p className="text-sm text-minimal-muted">Últimos 30 dias</p>
-              </div>
-            </div>
-            <MultiLineChart
-              data={multiChartData}
-              lines={[
-                {
-                  dataKey: "peso",
-                  name: "Peso",
-                  color: "#3b82f6",
-                  unit: weightMeasure.unit,
-                },
-                {
-                  dataKey: "cintura",
-                  name: "Cintura",
-                  color: "#10b981",
-                  unit: waistMeasure.unit,
-                },
-              ]}
-            />
-          </div>
-        )}
-
-        <div className="flex gap-4">
-          <Link href="/tracker">
-            <Button className="gap-2">
-              <Plus className="h-4 w-4" />
-              Gerenciar Medidas
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-          </Link>
-          <ExportButton />
-          {userIsAdmin && (
-            <Link href="/admin">
-              <Button variant="outline" className="gap-2">
-                <Shield className="h-4 w-4" />
-                Painel Admin
-              </Button>
-            </Link>
-          )}
-        </div>
-      </div>
-    </MainLayout>
-  )
+  return <DashboardClient initialData={initialData} />
 }
 

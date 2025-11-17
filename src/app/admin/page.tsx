@@ -1,46 +1,64 @@
 import { redirect } from "next/navigation"
-import { getSession } from "@/lib/auth/lucia"
 import { db } from "@/db"
-import { users } from "@/db/schema"
-import { eq } from "drizzle-orm"
-import { AdminPanel } from "./AdminPanel"
+import { requireAdmin } from "@/lib/auth/permissions"
+import { AdminDashboard } from "./AdminDashboard"
 
 export default async function AdminPage() {
   try {
-    // Verificar sessão primeiro
-    const { user, session } = await getSession()
+    const { user } = await requireAdmin()
 
-    if (!user || !session) {
-      redirect("/login")
-    }
-
-    // Sempre buscar role diretamente do banco para garantir precisão
-    const dbUser = await db.query.users.findFirst({
-      where: (users, { eq }) => eq(users.id, user.id),
+    const allUsers = await db.query.users.findMany({
       columns: {
         id: true,
         email: true,
         role: true,
+        createdAt: true,
       },
+      orderBy: (table, { desc }) => [desc(table.createdAt)],
     })
 
-    if (!dbUser) {
-      redirect("/login")
-    }
+    const serializedUsers = allUsers.map((item) => ({
+      id: item.id,
+      email: item.email,
+      role: (item.role as "user" | "admin") ?? "user",
+      createdAt: item.createdAt?.toISOString() ?? new Date().toISOString(),
+    }))
 
-    const userIsAdmin = dbUser.role === "admin"
+    const totalUsers = serializedUsers.length
+    const adminCount = serializedUsers.filter((entry) => entry.role === "admin").length
+    const memberCount = totalUsers - adminCount
 
-    if (!userIsAdmin) {
-      redirect("/dashboard")
-    }
+    const now = new Date()
+    const sevenDaysAgo = new Date(now)
+    sevenDaysAgo.setDate(now.getDate() - 7)
 
-    return <AdminPanel userIsAdmin={userIsAdmin} />
+    const newUsersThisWeek = serializedUsers.filter(
+      (entry) => new Date(entry.createdAt) >= sevenDaysAgo
+    ).length
+
+    return (
+      <AdminDashboard
+        currentAdminEmail={user.email}
+        currentAdminId={user.id}
+        initialUsers={serializedUsers}
+        metrics={{
+          totalUsers,
+          adminCount,
+          memberCount,
+          newUsersThisWeek,
+          lastSync: now.toISOString(),
+        }}
+      />
+    )
   } catch (error: any) {
     // Se o erro for um redirect, apenas propagar
     if (error && typeof error === "object" && "digest" in error) {
       throw error
     }
     console.error("Admin page error:", error)
+    if (error instanceof Error && error.message.includes("Forbidden")) {
+      redirect("/dashboard")
+    }
     redirect("/login")
   }
 }

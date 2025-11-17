@@ -272,17 +272,18 @@ export function TrackerClient({ userIsAdmin = false }: TrackerClientProps) {
   return (
     <MainLayout userIsAdmin={userIsAdmin}>
       <div className="space-y-6">
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-semibold text-white mb-2">Tracker de Medidas</h1>
-            <p className="text-minimal-muted">Gerencie suas medidas corporais</p>
+            <h1 className="text-2xl sm:text-3xl font-semibold text-white mb-2">Tracker de Medidas</h1>
+            <p className="text-sm sm:text-base text-minimal-muted">Gerencie suas medidas corporais</p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <Dialog open={isDateDialogOpen} onOpenChange={setIsDateDialogOpen}>
               <DialogTrigger asChild>
-                <Button variant="outline" className="gap-2">
+                <Button variant="outline" className="gap-2 text-sm sm:text-base">
                   <Plus className="h-4 w-4" />
-                  Adicionar Data
+                  <span className="hidden sm:inline">Adicionar Data</span>
+                  <span className="sm:hidden">Data</span>
                 </Button>
               </DialogTrigger>
               <DialogContent>
@@ -312,19 +313,21 @@ export function TrackerClient({ userIsAdmin = false }: TrackerClientProps) {
             </Dialog>
             <Button
               variant="outline"
-              className="gap-2"
+              className="gap-2 text-sm sm:text-base"
               onClick={() => {
                 window.location.href = "/api/export/csv"
               }}
             >
               <Download className="h-4 w-4" />
-              Exportar CSV
+              <span className="hidden sm:inline">Exportar CSV</span>
+              <span className="sm:hidden">CSV</span>
             </Button>
             <Dialog open={isImportDialogOpen} onOpenChange={setIsImportDialogOpen}>
               <DialogTrigger asChild>
-                <Button variant="outline" className="gap-2">
+                <Button variant="outline" className="gap-2 text-sm sm:text-base">
                   <Upload className="h-4 w-4" />
-                  Importar CSV
+                  <span className="hidden sm:inline">Importar CSV</span>
+                  <span className="sm:hidden">Importar</span>
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-2xl">
@@ -373,7 +376,7 @@ export function TrackerClient({ userIsAdmin = false }: TrackerClientProps) {
           </div>
         </div>
 
-        <div className="card-minimal p-6">
+        <div className="card-minimal p-4 sm:p-6">
           <MeasuresGrid
             measures={measures}
             entries={entries}

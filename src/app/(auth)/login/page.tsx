@@ -1,34 +1,23 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { Suspense, useState, useTransition } from "react"
 import Link from "next/link"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Checkbox } from "@/components/ui/checkbox"
 import { loginSchema } from "@/lib/utils/zod"
 import { useToast } from "@/components/ui/use-toast"
 
-const REMEMBER_ME_KEY = "shapeflow_remember_me"
-const REMEMBERED_EMAIL_KEY = "shapeflow_remembered_email"
-
-export default function LoginPage() {
+function LoginForm() {
   const { toast } = useToast()
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const redirectFrom = searchParams.get("from")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const [rememberMe, setRememberMe] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-
-  // Carregar email salvo ao montar o componente
-  useEffect(() => {
-    const rememberedEmail = localStorage.getItem(REMEMBERED_EMAIL_KEY)
-    const shouldRemember = localStorage.getItem(REMEMBER_ME_KEY) === "true"
-    
-    if (shouldRemember && rememberedEmail) {
-      setEmail(rememberedEmail)
-      setRememberMe(true)
-    }
-  }, [])
+  const [isPending, startTransition] = useTransition()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -41,7 +30,7 @@ export default function LoginPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(validatedData),
-        credentials: "include", // Importante: incluir cookies na requisição
+        credentials: "include",
       })
 
       const data = await response.json()
@@ -50,47 +39,16 @@ export default function LoginPage() {
         throw new Error(data.error || "Erro ao fazer login")
       }
 
-      // Salvar email se "Lembrar-me" estiver marcado
-      if (rememberMe) {
-        localStorage.setItem(REMEMBER_ME_KEY, "true")
-        localStorage.setItem(REMEMBERED_EMAIL_KEY, validatedData.email)
-      } else {
-        localStorage.removeItem(REMEMBER_ME_KEY)
-        localStorage.removeItem(REMEMBERED_EMAIL_KEY)
-      }
+      toast({
+        title: "Login realizado com sucesso!",
+      })
 
-      // Aguardar para garantir que o cookie seja processado pelo navegador
-      // Aumentar delay para garantir que o cookie seja totalmente processado
-      await new Promise((resolve) => setTimeout(resolve, 2000))
-      
-      // Verificar autenticação antes de redirecionar
-      try {
-        const checkResponse = await fetch("/api/auth/check", {
-          credentials: "include",
-          cache: "no-store",
-        })
-        const checkData = await checkResponse.json()
-        
-        if (checkData.authenticated) {
-          toast({
-            title: "Login realizado com sucesso!",
-          })
-          // Aguardar um pouco mais antes de redirecionar para garantir que tudo está pronto
-          await new Promise((resolve) => setTimeout(resolve, 500))
-          // Usar window.location.href para forçar um hard reload e garantir que o cookie seja enviado
-          window.location.href = "/dashboard"
-        } else {
-          throw new Error("Falha na autenticação. Tente novamente.")
-        }
-      } catch (checkError) {
-        console.error("Erro ao verificar autenticação:", checkError)
-        toast({
-          title: "Erro ao fazer login",
-          description: "O cookie não foi definido corretamente. Tente novamente.",
-          variant: "destructive",
-        })
-        setIsLoading(false)
-      }
+      // Usar router.push com refresh para garantir que o cookie seja propagado
+      // O refresh garante que o servidor leia o cookie atualizado
+      startTransition(() => {
+        router.push(redirectFrom || "/dashboard")
+        router.refresh()
+      })
     } catch (error: any) {
       toast({
         title: "Erro ao fazer login",
@@ -140,21 +98,8 @@ export default function LoginPage() {
               className="mt-1"
             />
           </div>
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="remember"
-              checked={rememberMe}
-              onCheckedChange={(checked) => setRememberMe(checked === true)}
-            />
-            <Label
-              htmlFor="remember"
-              className="text-sm font-normal cursor-pointer text-slate-400 hover:text-slate-200"
-            >
-              Lembrar usuário e senha
-            </Label>
-          </div>
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? "Entrando..." : "Entrar"}
+          <Button type="submit" className="w-full" disabled={isLoading || isPending}>
+            {isLoading || isPending ? "Entrando..." : "Entrar"}
           </Button>
         </form>
         <p className="text-center text-sm text-slate-400">
@@ -165,6 +110,14 @@ export default function LoginPage() {
         </p>
       </div>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginForm />
+    </Suspense>
   )
 }
 

@@ -296,28 +296,28 @@ export function MeasuresGrid({
   }
 
   return (
-    <div className="w-full overflow-x-auto rounded-lg border border-slate-800/50">
+    <div className="w-full overflow-x-auto rounded-lg border border-slate-800/50 -mx-4 sm:-mx-6 sm:mx-0">
       <div className="inline-block min-w-full">
-        <table className="border-collapse">
+        <table className="border-collapse w-full">
           <thead>
             <tr className="bg-slate-900/50">
-              <th className="sticky left-0 z-10 bg-slate-900/95 border-r border-slate-800/50 px-4 py-3 text-left backdrop-blur-sm">
+              <th className="sticky left-0 z-10 bg-slate-900/95 border-r border-slate-800/50 px-3 sm:px-4 py-2 sm:py-3 text-left backdrop-blur-sm min-w-[140px] sm:min-w-[180px]">
                 <div className="flex items-center gap-2">
-                  <span className="font-semibold text-white">Medida</span>
+                  <span className="font-semibold text-white text-sm sm:text-base">Medida</span>
                   <Button
                     size="sm"
                     variant="ghost"
                     onClick={onAddMeasure}
-                    className="h-6 w-6 p-0 hover:bg-slate-800"
+                    className="h-6 w-6 p-0 hover:bg-slate-800 flex-shrink-0"
                   >
-                    <Plus className="h-4 w-4" />
+                    <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
                   </Button>
                 </div>
               </th>
               {sortedEntries.map((entry) => (
                 <th
                   key={entry.id}
-                  className="border-b border-r border-slate-800/50 px-3 py-3 text-center text-xs font-medium text-minimal-muted min-w-[100px]"
+                  className="border-b border-r border-slate-800/50 px-2 sm:px-3 py-2 sm:py-3 text-center text-xs font-medium text-minimal-muted min-w-[90px] sm:min-w-[100px]"
                 >
                   {formatDateDisplay(new Date(entry.date + "T00:00:00"))}
                 </th>
@@ -329,43 +329,43 @@ export function MeasuresGrid({
               const goal = getGoal(measure.id)
               return (
                 <tr key={measure.id} className="border-b border-slate-800/50 hover:bg-slate-900/30 transition-colors">
-                  <td className="sticky left-0 z-10 bg-slate-900/95 border-r border-slate-800/50 px-4 py-3 backdrop-blur-sm">
+                  <td className="sticky left-0 z-10 bg-slate-900/95 border-r border-slate-800/50 px-3 sm:px-4 py-2 sm:py-3 backdrop-blur-sm">
                     <div className="flex flex-col gap-1.5">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1 sm:gap-2">
                         <Link 
                           href={`/tracker/${measure.id}`}
-                          className="font-medium text-white hover:text-blue-400 transition-colors cursor-pointer flex-1"
+                          className="font-medium text-white hover:text-blue-400 transition-colors cursor-pointer flex-1 text-sm sm:text-base"
                         >
                           {measure.name}
                         </Link>
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-0.5 sm:gap-1 flex-shrink-0">
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="h-6 w-6 p-0 hover:bg-slate-800"
+                            className="h-5 w-5 sm:h-6 sm:w-6 p-0 hover:bg-slate-800"
                             onClick={(e) => {
                               e.preventDefault()
                               handleEditMeasure(measure)
                             }}
                             title="Renomear medida"
                           >
-                            <Pencil className="h-3.5 w-3.5" />
+                            <Pencil className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                           </Button>
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="h-6 w-6 p-0 hover:bg-red-500/20 hover:text-red-400"
+                            className="h-5 w-5 sm:h-6 sm:w-6 p-0 hover:bg-red-500/20 hover:text-red-400"
                             onClick={(e) => {
                               e.preventDefault()
                               handleDeleteMeasure(measure)
                             }}
                             title="Excluir medida"
                           >
-                            <Trash2 className="h-3.5 w-3.5" />
+                            <Trash2 className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                           </Button>
                           <Link href={`/tracker/${measure.id}`}>
-                            <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-slate-800" title="Ver gráfico">
-                              <ChartLine className="h-3.5 w-3.5" />
+                            <Button variant="ghost" size="sm" className="h-5 w-5 sm:h-6 sm:w-6 p-0 hover:bg-slate-800" title="Ver gráfico">
+                              <ChartLine className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                             </Button>
                           </Link>
                         </div>
@@ -386,16 +386,16 @@ export function MeasuresGrid({
                     return (
                       <td
                         key={entry.id}
-                        className="border-r border-slate-800/50 px-2 py-2 bg-slate-950/50 relative group"
+                        className="border-r border-slate-800/50 px-1 sm:px-2 py-2 bg-slate-950/50 relative group"
                       >
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-0.5 sm:gap-1">
                           <Input
                             type="number"
                             value={value}
                             onChange={(e) =>
                               handleCellChange(entry.id, measure.id, e.target.value)
                             }
-                            className={`h-9 text-center text-sm bg-slate-900/50 border-slate-800 flex-1 ${
+                            className={`h-8 sm:h-9 text-center text-xs sm:text-sm bg-slate-900/50 border-slate-800 flex-1 ${
                               isPending ? "opacity-50" : ""
                             }`}
                             placeholder="-"
@@ -404,11 +404,11 @@ export function MeasuresGrid({
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="h-9 w-9 p-0 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500/20 hover:text-red-400"
+                              className="h-8 w-8 sm:h-9 sm:w-9 p-0 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500/20 hover:text-red-400"
                               onClick={() => handleClearValueClick(entry.id, measure.id)}
                               title="Limpar valor"
                             >
-                              <X className="h-4 w-4" />
+                              <X className="h-3 w-3 sm:h-4 sm:w-4" />
                             </Button>
                           )}
                         </div>
