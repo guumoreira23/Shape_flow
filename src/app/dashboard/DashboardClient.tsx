@@ -125,15 +125,35 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
   const weightData = weightMeasure
     ? entries
         .map((entry) => {
+          // Validar se entry.date existe e é válido
+          if (!entry.date) {
+            return null
+          }
+          // Converter para string se necessário
+          const dateString = typeof entry.date === 'string' ? entry.date : String(entry.date)
+          if (dateString.trim() === "") {
+            return null
+          }
           const value = values.find(
             (v) => v.entryId === entry.id && v.measureTypeId === weightMeasure.id
           )
-          return value
-            ? {
-                date: formatDateDisplay(parseDate(entry.date)),
-                value: value.value,
-              }
-            : null
+          if (!value) {
+            return null
+          }
+          try {
+            const parsedDate = parseDate(dateString)
+            // Verificar se a data é válida
+            if (isNaN(parsedDate.getTime())) {
+              return null
+            }
+            return {
+              date: formatDateDisplay(parsedDate),
+              value: value.value,
+            }
+          } catch (error) {
+            console.error("Erro ao processar data:", entry.date, error)
+            return null
+          }
         })
         .filter((d): d is { date: string; value: number } => d !== null)
         .slice(-7)
@@ -166,19 +186,38 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
   const multiChartData = entries
     .slice(-30)
     .map((entry) => {
+      // Validar se entry.date existe e é válido
+      if (!entry.date) {
+        return null
+      }
+      // Converter para string se necessário
+      const dateString = typeof entry.date === 'string' ? entry.date : String(entry.date)
+      if (dateString.trim() === "") {
+        return null
+      }
       const weightValue = values.find(
         (v) => v.entryId === entry.id && weightMeasure && v.measureTypeId === weightMeasure.id
       )
       const waistValue = values.find(
         (v) => v.entryId === entry.id && waistMeasure && v.measureTypeId === waistMeasure.id
       )
-      return {
-        date: formatDate(parseDate(entry.date)),
-        peso: weightValue ? weightValue.value : null,
-        cintura: waistValue ? waistValue.value : null,
+      try {
+        const parsedDate = parseDate(dateString)
+        // Verificar se a data é válida
+        if (isNaN(parsedDate.getTime())) {
+          return null
+        }
+        return {
+          date: formatDate(parsedDate),
+          peso: weightValue ? weightValue.value : null,
+          cintura: waistValue ? waistValue.value : null,
+        }
+      } catch (error) {
+        console.error("Erro ao processar data:", entry.date, error)
+        return null
       }
     })
-    .filter((d) => d.peso !== null || d.cintura !== null)
+    .filter((d): d is { date: string; peso: number | null; cintura: number | null } => d !== null && (d.peso !== null || d.cintura !== null))
 
   return (
     <MainLayout userIsAdmin={userIsAdmin}>
