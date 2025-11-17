@@ -31,6 +31,7 @@ interface Food {
   id: number | string
   name: string
   brand?: string | null
+  barcode?: string | null
   calories: number
   protein: number
   carbs: number
