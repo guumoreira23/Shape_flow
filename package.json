@@ -12,7 +12,8 @@
     "create-admin": "tsx scripts/create-admin.ts",
     "reset-admin": "tsx scripts/reset-admin-password.ts",
     "migrate:deadline": "tsx scripts/add-deadline-to-goals.ts",
-    "migrate:notes": "tsx scripts/add-notes-to-measurement-values.ts"
+    "migrate:notes": "tsx scripts/add-notes-to-measurement-values.ts",
+    "migrate:theme": "tsx scripts/add-theme-to-users.ts"
   },
   "dependencies": {
     "@lucia-auth/adapter-postgresql": "^3.0.1",
