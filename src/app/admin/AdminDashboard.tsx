@@ -181,9 +181,10 @@ export function AdminDashboard({
       const searchMatch =
         searchTerm.trim().length === 0 ||
         user.email.toLowerCase().includes(searchTerm.trim().toLowerCase())
-      return roleMatch && searchMatch
+      const dateMatch = !dateFilter || user.createdAt.startsWith(dateFilter)
+      return roleMatch && searchMatch && dateMatch
     })
-  }, [users, roleFilter, searchTerm])
+  }, [users, roleFilter, searchTerm, dateFilter])
 
   const openCreateDialog = () => {
     setNewUserEmail("")
@@ -548,6 +549,35 @@ export function AdminDashboard({
           </div>
         </section>
 
+        {/* Tabs */}
+        <div className="flex gap-2 border-b border-slate-800">
+          <button
+            onClick={() => setActiveTab("users")}
+            className={cn(
+              "px-4 py-2 text-sm font-medium border-b-2 transition-colors",
+              activeTab === "users"
+                ? "border-blue-500 text-blue-400"
+                : "border-transparent text-minimal-muted hover:text-white"
+            )}
+          >
+            <Users className="h-4 w-4 inline mr-2" />
+            Usuários
+          </button>
+          <button
+            onClick={() => setActiveTab("audit")}
+            className={cn(
+              "px-4 py-2 text-sm font-medium border-b-2 transition-colors",
+              activeTab === "audit"
+                ? "border-blue-500 text-blue-400"
+                : "border-transparent text-minimal-muted hover:text-white"
+            )}
+          >
+            <FileText className="h-4 w-4 inline mr-2" />
+            Auditoria
+          </button>
+        </div>
+
+        {activeTab === "users" && (
         <section className="card-minimal">
           <div className="border-b border-slate-800/50 p-4 sm:p-6 space-y-4 sm:space-y-6">
             <div className="flex flex-col gap-2">
