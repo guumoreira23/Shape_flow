@@ -158,3 +158,53 @@ export const nutritionGoals = pgTable(
   })
 )
 
+// Fase 4 - Hidratação e Jejum Intermitente
+export const waterIntake = pgTable("water_intake", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  amount: integer("amount").notNull(), // Quantidade em ml
+  timestamp: timestamp("timestamp").notNull().defaultNow(),
+  date: timestamp("date").notNull(), // Data do registro (sem hora)
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+})
+
+export const waterGoals = pgTable(
+  "water_goals",
+  {
+    id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    targetAmount: integer("target_amount").notNull().default(2000), // Meta diária em ml
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (table) => ({
+    userWaterGoalUnique: uniqueIndex("user_water_goal_unique").on(table.userId),
+  })
+)
+
+export const fastingSchedules = pgTable(
+  "fasting_schedules",
+  {
+    id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    fastingType: text("fasting_type").notNull(), // "16:8", "14:10", "18:6", "20:4", "custom"
+    startTime: timestamp("start_time").notNull(), // Início do período de jejum
+    endTime: timestamp("end_time").notNull(), // Fim do período de jejum
+    isActive: integer("is_active").notNull().default(1), // 1 = ativo, 0 = inativo
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (table) => ({
+    userActiveFastingUnique: uniqueIndex("user_active_fasting_unique").on(
+      table.userId,
+      table.isActive
+    ),
+  })
+)
+

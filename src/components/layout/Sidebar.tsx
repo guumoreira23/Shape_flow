@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LayoutDashboard, BarChart3, Users, LogOut, X, UtensilsCrossed } from "lucide-react"
+import { LayoutDashboard, BarChart3, Users, LogOut, X, UtensilsCrossed, Droplet, Timer } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
@@ -28,6 +28,16 @@ const navItems: NavItem[] = [
     title: "Diário Alimentar",
     href: "/diario",
     icon: UtensilsCrossed,
+  },
+  {
+    title: "Hidratação",
+    href: "/hidratacao",
+    icon: Droplet,
+  },
+  {
+    title: "Jejum Intermitente",
+    href: "/jejum",
+    icon: Timer,
   },
   {
     title: "Central Administrativa",
